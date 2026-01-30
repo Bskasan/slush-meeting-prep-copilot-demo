@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model PrepPack {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Identifying Information
+  title        String
+  startupName  String?
+  investorName String?
+
+  // Raw Input Data
+  startupProfileText  String @db.Text
+  investorProfileText String @db.Text
+
+  // Structured Output
+  // Store the strict JSON result here
+  resultJson Json
+
+  // Metadata for observability
+  model      String? // e.g., "gpt-4o", "claude-3-5-sonnet"
+  tokensUsed Int? // Optional: helpful for tracking costs
+
+  @@map("prep_packs") // Standardizes table naming conventions
+}

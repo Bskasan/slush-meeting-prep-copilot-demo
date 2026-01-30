@@ -1,0 +1,23 @@
+{
+  "name": "meeting-prep-copilot",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "npm run dev -w @meeting-prep/client",
+    "dev:server": "npm run dev -w @meeting-prep/server",
+    "build": "npm run build -w @meeting-prep/server && npm run build -w @meeting-prep/client",
+    "build:client": "npm run build -w @meeting-prep/client",
+    "build:server": "npm run build -w @meeting-prep/server",
+    "lint": "npm run lint -w @meeting-prep/client",
+    "db:migrate": "npm run db:migrate -w @meeting-prep/server",
+    "db:seed": "npm run db:seed -w @meeting-prep/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "npm@10.0.0"
+}

@@ -97,3 +97,13 @@ export function updatePrepPack(
 export function deletePrepPack(id: string, signal?: AbortSignal): Promise<void> {
   return apiFetch<unknown>(`/api/prep-packs/${id}`, { method: 'DELETE', signal }).then(() => {});
 }
+
+export async function checkHealth(signal?: AbortSignal): Promise<boolean> {
+  const url = `${BASE_URL || ''}/health`;
+  try {
+    const res = await fetch(url, { signal });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}

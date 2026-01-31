@@ -7,3 +7,4 @@ export const fetchPrepPacks = jest.fn();
 export const fetchPrepPackById = jest.fn();
 export const updatePrepPack = jest.fn();
 export const deletePrepPack = jest.fn();
+export const checkHealth = jest.fn().mockResolvedValue(true);

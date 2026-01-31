@@ -1,5 +1,19 @@
 import { z } from "zod";
 
+/** Length limits for profile text and names (reuse across generate + prep-packs). */
+export const MIN_CHARS = 80;
+export const MAX_CHARS = 8000;
+export const MAX_NAME_LEN = 80;
+export const MAX_TITLE_LEN = 120;
+
+const profileTextSchema = z
+  .string()
+  .trim()
+  .min(MIN_CHARS, "Startup and investor profiles must be at least 80 characters.")
+  .max(MAX_CHARS);
+
+const optionalNameSchema = z.string().trim().max(MAX_NAME_LEN).optional();
+
 const agendaSchema = z
   .object({
     min0_2: z.array(z.string()).min(1),
@@ -31,10 +45,10 @@ export type PrepPackResult = z.infer<typeof prepPackResultSchema>;
 /** POST /api/generate request body. */
 export const generateRequestSchema = z
   .object({
-    startupProfileText: z.string().min(1),
-    investorProfileText: z.string().min(1),
-    startupName: z.string().trim().optional(),
-    investorName: z.string().trim().optional(),
+    startupProfileText: profileTextSchema,
+    investorProfileText: profileTextSchema,
+    startupName: optionalNameSchema,
+    investorName: optionalNameSchema,
   })
   .strict();
 
@@ -55,11 +69,11 @@ export type GenerateResponse = z.infer<typeof generateResponseSchema>;
 /** POST /api/prep-packs request body (includes resultJson validated with prepPackResultSchema). */
 export const savePrepPackRequestSchema = z
   .object({
-    title: z.string().min(1),
-    startupName: z.string().optional(),
-    investorName: z.string().optional(),
-    startupProfileText: z.string().min(1),
-    investorProfileText: z.string().min(1),
+    title: z.string().trim().min(1).max(MAX_TITLE_LEN),
+    startupName: optionalNameSchema,
+    investorName: optionalNameSchema,
+    startupProfileText: profileTextSchema,
+    investorProfileText: profileTextSchema,
     resultJson: prepPackResultSchema,
     model: z.string().optional(),
     tokensUsed: z.number().optional(),

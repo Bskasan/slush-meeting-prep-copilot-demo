@@ -4,6 +4,7 @@ import type {
   PrepPackDetail,
   PrepPackListItem,
   SavePrepPackRequest,
+  UpdatePrepPackRequest,
 } from '../types';
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');
@@ -39,7 +40,8 @@ async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise
     let message = res.statusText;
     try {
       const data = await res.json();
-      if (data?.error?.message) message = data.error.message;
+      if (typeof data?.error === 'string') message = data.error;
+      else if (data?.error?.message) message = data.error.message;
       else if (typeof data?.message === 'string') message = data.message;
     } catch {
       // use statusText
@@ -78,4 +80,20 @@ export function fetchPrepPacks(signal?: AbortSignal): Promise<PrepPackListItem[]
 
 export function fetchPrepPackById(id: string, signal?: AbortSignal): Promise<PrepPackDetail> {
   return apiFetch<PrepPackDetail>(`/api/prep-packs/${id}`, { signal });
+}
+
+export function updatePrepPack(
+  id: string,
+  body: UpdatePrepPackRequest,
+  signal?: AbortSignal
+): Promise<PrepPackDetail> {
+  return apiFetch<PrepPackDetail>(`/api/prep-packs/${id}`, {
+    method: 'PATCH',
+    body,
+    signal,
+  });
+}
+
+export function deletePrepPack(id: string, signal?: AbortSignal): Promise<void> {
+  return apiFetch<unknown>(`/api/prep-packs/${id}`, { method: 'DELETE', signal }).then(() => {});
 }

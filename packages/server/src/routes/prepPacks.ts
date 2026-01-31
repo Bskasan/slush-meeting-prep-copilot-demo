@@ -91,13 +91,7 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
 // PATCH: Update a prep pack
 router.patch("/:id", async (req: Request, res: Response) => {
   if (!validatePatchBody(req.body)) {
-    res.status(400).json({
-      error: {
-        code: "VALIDATION_ERROR",
-        message: "Must be a JSON object for partial update.",
-        details: null,
-      },
-    });
+    res.status(400).json({ error: "Must be a JSON object for partial update." });
     return;
   }
   const id = String(req.params.id);

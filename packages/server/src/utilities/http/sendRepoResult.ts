@@ -17,11 +17,5 @@ export function sendRepoResult<T>(
 
   const code = result.code ?? "INTERNAL_ERROR";
   const status = statusForCode(code);
-  res.status(status).json({
-    error: {
-      code,
-      message: result.message,
-      details: result.details ?? null,
-    },
-  });
+  res.status(status).json({ error: result.message ?? "Something went wrong." });
 }

@@ -39,6 +39,15 @@ export interface SavePrepPackRequest {
   tokensUsed?: number;
 }
 
+/** Partial update for PATCH /api/prep-packs/:id */
+export interface UpdatePrepPackRequest {
+  title?: string;
+  startupName?: string;
+  investorName?: string;
+  startupProfileText?: string;
+  investorProfileText?: string;
+}
+
 export interface PrepPackListItem {
   id: string;
   createdAt: string;

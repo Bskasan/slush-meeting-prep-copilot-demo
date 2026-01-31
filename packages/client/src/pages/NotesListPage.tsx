@@ -1,0 +1,76 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { fetchPrepPacks } from '../lib/api';
+import type { PrepPackListItem } from '../types';
+import { ErrorBanner } from '../components/ErrorBanner';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+
+function formatDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString();
+  } catch {
+    return iso;
+  }
+}
+
+export default function NotesListPage() {
+  const [items, setItems] = useState<PrepPackListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ac = new AbortController();
+    fetchPrepPacks(ac.signal)
+      .then(setItems)
+      .catch((e) => {
+        if (e instanceof Error && (e.name === 'AbortError' || /aborted/i.test(e.message))) return;
+        setError(e instanceof Error ? e.message : 'Failed to load notes');
+      })
+      .finally(() => {
+        if (!ac.signal.aborted) setLoading(false);
+      });
+    return () => ac.abort();
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorBanner message={error} />;
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Notes</h1>
+      {items.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-white/10 bg-zinc-900/40 p-8 text-center text-zinc-500">
+          No saved prep packs yet. Generate one from the Generate page.
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {items.map((item) => (
+            <li key={item.id}>
+              <Link
+                to={`/notes/${item.id}`}
+                className="block rounded-xl border border-white/10 bg-zinc-900/60 p-4 transition-colors hover:border-cyan-400/30 hover:bg-zinc-900/80"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-zinc-100">{item.title}</span>
+                  {item.fitScore != null && (
+                    <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-xs font-medium text-cyan-300">
+                      {item.fitScore}/100
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1 text-sm text-zinc-500">
+                  {formatDate(item.createdAt)}
+                  {(item.startupName || item.investorName) && (
+                    <span className="ml-2">
+                      · {[item.startupName, item.investorName].filter(Boolean).join(' · ')}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

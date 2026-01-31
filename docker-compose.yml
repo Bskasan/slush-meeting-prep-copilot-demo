@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: meeting_prep
+      POSTGRES_PASSWORD: meeting_prep
+      POSTGRES_DB: meeting_prep
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meeting_prep -d meeting_prep"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://meeting_prep:meeting_prep@postgres:5432/meeting_prep
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:

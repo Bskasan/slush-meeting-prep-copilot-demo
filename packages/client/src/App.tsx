@@ -1,34 +1,59 @@
-import { useEffect, useState } from 'react';
-import { checkHealth } from './services/api';
+import { Link, NavLink, Outlet, Routes, Route } from 'react-router-dom';
+import GeneratorPage from './pages/GeneratorPage';
+import NotesListPage from './pages/NotesListPage';
+import NoteDetailPage from './pages/NoteDetailPage';
 
-function App() {
-  const [status, setStatus] = useState<'loading' | 'online' | 'offline'>('loading');
-
-  useEffect(() => {
-    checkHealth()
-      .then(() => setStatus('online'))
-      .catch(() => setStatus('offline'));
-  }, []);
-
+function Layout() {
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
-      <h1 className="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-        Meeting Prep Copilot
-      </h1>
-      
-      <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">System Status</h2>
-        <div className="flex items-center space-x-3">
-          <div className={`h-3 w-3 rounded-full animate-pulse ${
-            status === 'online' ? 'bg-green-500' : status === 'offline' ? 'bg-red-500' : 'bg-yellow-500'
-          }`} />
-          <span className="capitalize font-mono text-sm">
-            Backend & Database: {status}
-          </span>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-zinc-950 to-zinc-900 text-zinc-100">
+      <header className="sticky top-0 z-10 border-b border-white/10 bg-zinc-950/80 backdrop-blur-sm">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+          <Link to="/" className="font-bold text-lg text-zinc-100 hover:text-cyan-400 transition-colors">
+            Meeting Prep Copilot
+          </Link>
+          <nav className="flex gap-1">
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) =>
+                `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive ? 'text-cyan-400 bg-cyan-400/10' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
+                }`
+              }
+            >
+              Generate
+            </NavLink>
+            <NavLink
+              to="/notes"
+              className={({ isActive }) =>
+                `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive ? 'text-cyan-400 bg-cyan-400/10' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
+                }`
+              }
+            >
+              Notes
+            </NavLink>
+          </nav>
         </div>
-      </div>
+      </header>
+      <main className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-8">
+        <Outlet />
+      </main>
+      <footer className="border-t border-white/10 py-3 text-center text-xs text-zinc-500">
+        Meeting Prep Copilot · Internal tool
+      </footer>
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<GeneratorPage />} />
+        <Route path="notes" element={<NotesListPage />} />
+        <Route path="notes/:id" element={<NoteDetailPage />} />
+      </Route>
+    </Routes>
+  );
+}

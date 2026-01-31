@@ -1,0 +1,37 @@
+# Dependencies (reinstalled in image)
+node_modules/
+
+# Git
+.git
+.gitignore
+
+# Build outputs
+dist/
+build/
+
+# Environment and secrets (not copied into image)
+.env
+.env.*
+env.example
+
+# Logs and debug
+*.log
+npm-debug.log*
+logs/
+
+# Docs and misc (not needed for server image)
+docs/
+*.md
+!packages/server/README.md
+
+# Editor and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Client: exclude everything except package.json (Dockerfile only needs that file)
+packages/client/*
+!packages/client/package.json

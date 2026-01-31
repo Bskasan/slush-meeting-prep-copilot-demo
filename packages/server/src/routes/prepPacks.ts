@@ -1,71 +1,50 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import PrepPackRepository from "../utilities/database/repositories/PrepPack";
-import type DatabaseResponse from "../utilities/database/response";
 import { sendRepoResult } from "../utilities/http/sendRepoResult";
+import { savePrepPackRequestSchema } from "../schemas";
 
 const router = express.Router();
 const prepPackRepo = new PrepPackRepository();
 
-type ValidationIssue = { field: string; issue: string };
-
-/** Validate POST body for create. Returns validation error to send, or null if valid. */
-function validateCreateBody(body: unknown): DatabaseResponse<never> | null {
-  if (body === null || typeof body !== "object") {
-    return {
-      data: null,
-      ok: false,
-      message: "Invalid or missing required fields.",
-      code: "VALIDATION_ERROR",
-      details: [{ field: "body", issue: "Request body must be a JSON object." }] as ValidationIssue[],
-    };
-  }
-  const issues: ValidationIssue[] = [];
-  const b = body as Record<string, unknown>;
-  if (typeof b.title !== "string" || !b.title.trim()) {
-    issues.push({ field: "title", issue: "Must be a non-empty string." });
-  }
-  if (typeof b.startupProfileText !== "string") {
-    issues.push({ field: "startupProfileText", issue: "Must be a string." });
-  }
-  if (typeof b.investorProfileText !== "string") {
-    issues.push({ field: "investorProfileText", issue: "Must be a string." });
-  }
-  if (b.resultJson === undefined || b.resultJson === null) {
-    issues.push({ field: "resultJson", issue: "Required and must be JSON." });
-  }
-  if (issues.length > 0) {
-    return {
-      data: null,
-      ok: false,
-      message: "Invalid or missing required fields.",
-      code: "VALIDATION_ERROR",
-      details: issues,
-    };
-  }
-  return null;
+/** Validate PATCH body: must be a non-null object. Used for partial update. */
+function validatePatchBody(body: unknown): boolean {
+  return body !== null && typeof body === "object" && !Array.isArray(body);
 }
 
-/** Validate PATCH body: must be a non-null object. Returns validation error to send, or null if valid. */
-function validatePatchBody(body: unknown): DatabaseResponse<never> | null {
-  if (body === null || typeof body !== "object" || Array.isArray(body)) {
-    return {
-      data: null,
-      ok: false,
-      message: "Invalid or missing required fields.",
-      code: "VALIDATION_ERROR",
-      details: [{ field: "body", issue: "Must be a JSON object for partial update." }] as ValidationIssue[],
-    };
-  }
-  return null;
+type ListItem = {
+  id: string;
+  createdAt: Date;
+  title: string;
+  startupName: string | null;
+  investorName: string | null;
+  fitScore: number | null;
+};
+
+function toListItem(row: { id: string; createdAt: Date; title: string; startupName: string | null; investorName: string | null; resultJson: unknown }): ListItem {
+  const resultJson = row.resultJson as { fitScore?: number } | null | undefined;
+  const fitScore = typeof resultJson?.fitScore === "number" ? resultJson.fitScore : null;
+  return {
+    id: row.id,
+    createdAt: row.createdAt,
+    title: row.title,
+    startupName: row.startupName,
+    investorName: row.investorName,
+    fitScore,
+  };
 }
 
-// GET: Fetch all saved packs
+// GET: Fetch all saved packs (minimal list: id, createdAt, title, startupName, investorName, fitScore)
 router.get("/", async (_req: Request, res: Response) => {
   const result = await prepPackRepo.getAllPrepPacks();
-  sendRepoResult(res, result);
+  if (!result.ok) {
+    sendRepoResult(res, result);
+    return;
+  }
+  const list = (result.data ?? []).map(toListItem);
+  res.status(200).json(list);
 });
 
-// GET: Fetch one prep pack by ID
+// GET: Fetch one prep pack by ID (full record)
 router.get("/:id", async (req: Request, res: Response) => {
   const id = String(req.params.id);
   const result = await prepPackRepo.getPrepPackById(id);
@@ -73,33 +52,54 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 // POST: Create a new prep pack
-router.post("/", async (req: Request, res: Response) => {
-  const validationError = validateCreateBody(req.body);
-  if (validationError) {
-    sendRepoResult(res, validationError);
-    return;
+router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const parsed = savePrepPackRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      console.error("POST /api/prep-packs validation failed:", parsed.error.flatten());
+      next(parsed.error);
+      return;
+    }
+    const {
+      title,
+      startupName,
+      investorName,
+      startupProfileText,
+      investorProfileText,
+      resultJson,
+      model,
+      tokensUsed,
+    } = parsed.data;
+    const createData = {
+      title,
+      startupProfileText,
+      investorProfileText,
+      resultJson: resultJson as object,
+      ...(startupName !== undefined && startupName !== "" && { startupName }),
+      ...(investorName !== undefined && investorName !== "" && { investorName }),
+      ...(model !== undefined && model !== "" && { model }),
+      ...(tokensUsed !== undefined && typeof tokensUsed === "number" && { tokensUsed }),
+    };
+    const result = await prepPackRepo.createPrepPack(createData);
+    sendRepoResult(res, result, { successStatus: 201 });
+  } catch (err) {
+    console.error("POST /api/prep-packs error:", err);
+    next(err);
   }
-
-  const { title, startupProfileText, investorProfileText, resultJson } = req.body;
-
-  const result = await prepPackRepo.createPrepPack({
-    title,
-    startupProfileText,
-    investorProfileText,
-    resultJson,
-  });
-
-  sendRepoResult(res, result, { successStatus: 201 });
 });
 
 // PATCH: Update a prep pack
 router.patch("/:id", async (req: Request, res: Response) => {
-  const validationError = validatePatchBody(req.body);
-  if (validationError) {
-    sendRepoResult(res, validationError);
+  if (!validatePatchBody(req.body)) {
+    res.status(400).json({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Must be a JSON object for partial update.",
+        details: null,
+      },
+    });
     return;
   }
-
   const id = String(req.params.id);
   const result = await prepPackRepo.updatePrepPack(id, req.body);
   sendRepoResult(res, result);

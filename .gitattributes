@@ -1,0 +1,2 @@
+# Ensure shell scripts use LF in repo so they run correctly in Linux containers
+packages/server/docker-entrypoint.sh text eol=lf

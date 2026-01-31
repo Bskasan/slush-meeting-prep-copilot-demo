@@ -52,6 +52,33 @@ npm run build
 Build client only: `npm run build:client`  
 Build server only: `npm run build:server`
 
+### Docker
+
+Run Postgres and the API in containers; run the client on the host for fast HMR. For more detail on what Docker is, why we use it, and how it’s implemented, see [docs/DOCKER.md](docs/DOCKER.md).
+
+1. Start Postgres and the server:
+
+   ```bash
+   docker compose up -d postgres
+   docker compose up --build server
+   ```
+
+   Or start both at once: `docker compose up --build`
+
+2. On the host, start the client (Vite proxies `/api` and `/health` to the server at `localhost:3000`):
+
+   ```bash
+   npm run dev:client
+   ```
+
+3. (Optional) Seed the database once:
+
+   ```bash
+   docker compose exec server npm run db:seed
+   ```
+
+The server runs migrations on startup. Environment variables for the server container (e.g. `DATABASE_URL`) are set in `docker-compose.yml`. For local (non-Docker) runs, copy `env.example` to `.env` in the repo root or `packages/server` and set `DATABASE_URL` and `PORT`.
+
 ## Project structure
 
 ```

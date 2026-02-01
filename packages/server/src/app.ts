@@ -1,7 +1,7 @@
 import cors from "cors";
 import express from "express";
 import { ZodError } from "zod";
-import { ALLOWED_ORIGINS } from "./config";
+import { isOriginAllowed } from "./config";
 import { createRateLimiter } from "./middleware/rateLimit";
 import generateRouter from "./routes/generate";
 import healthRouter from "./routes/health";
@@ -12,7 +12,31 @@ const JSON_BODY_LIMIT = "256kb";
 
 const app = express();
 
-app.use(cors({ origin: ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : ["http://localhost:5173"], credentials: true }));
+// CORS: set headers first so they're always present when the request reaches our app (avoids issues with 503/cold start from proxy)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && isOriginAllowed(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  }
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      const allowed = isOriginAllowed(origin ?? undefined) || (!origin && process.env.NODE_ENV !== "production");
+      cb(null, allowed ? (origin ?? true) : false);
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: JSON_BODY_LIMIT }));
 
 app.use((req: express.Request, _res: express.Response, next: express.NextFunction) => {

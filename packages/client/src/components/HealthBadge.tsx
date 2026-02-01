@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react';
-import { checkHealth } from '../lib/api';
-
-const POLL_INTERVAL_MS = 30_000;
-
-type Status = 'checking' | 'online' | 'offline';
+import { useEffect, useState } from "react";
+import { checkHealth } from "../lib/api";
+import { POLL_INTERVAL_MS } from "../utilities/constants";
+import type { Status } from "../types/healthBadge";
 
 export default function HealthBadge() {
-  const [status, setStatus] = useState<Status>('checking');
+  const [status, setStatus] = useState<Status>("checking");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -14,7 +12,7 @@ export default function HealthBadge() {
 
     const run = async () => {
       const ok = await checkHealth(signal);
-      setStatus(ok ? 'online' : 'offline');
+      setStatus(ok ? "online" : "offline");
     };
 
     run();
@@ -28,26 +26,29 @@ export default function HealthBadge() {
 
   const config = {
     checking: {
-      dot: 'bg-zinc-500',
-      text: 'text-zinc-500',
-      label: 'Checking...',
+      dot: "bg-zinc-500",
+      text: "text-zinc-500",
+      label: "Checking...",
     },
     online: {
-      dot: 'bg-emerald-500',
-      text: 'text-emerald-400',
-      label: 'Server online',
+      dot: "bg-emerald-500",
+      text: "text-emerald-400",
+      label: "Server online",
     },
     offline: {
-      dot: 'bg-red-500/70',
-      text: 'text-zinc-500',
-      label: 'Server offline',
+      dot: "bg-red-500/70",
+      text: "text-zinc-500",
+      label: "Server offline",
     },
   } satisfies Record<Status, { dot: string; text: string; label: string }>;
 
   const { dot, text, label } = config[status];
 
   return (
-    <span className={`inline-flex items-center gap-1.5 text-xs ${text}`} title={label}>
+    <span
+      className={`inline-flex items-center gap-1.5 text-xs ${text}`}
+      title={label}
+    >
       <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden />
       {label}
     </span>

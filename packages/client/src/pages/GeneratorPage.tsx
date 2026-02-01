@@ -1,19 +1,24 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { generatePrepPack, savePrepPack } from '../lib/api';
-import type { GenerateResponse } from '../types';
-import { PrepPackView } from '../components/PrepPackView';
-import { ErrorBanner } from '../components/ErrorBanner';
-import { LoadingSpinner } from '../components/LoadingSpinner';
-import { inputCompact, textareaClass, btnPrimary, btnSecondary } from '../styles/ui';
-import { MIN_CHARS, MAX_CHARS, MAX_NAME_LEN, MAX_TITLE_LEN } from '../constants';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { generatePrepPack, savePrepPack } from "../lib/api";
+import { PrepPackView } from "../components/PrepPackView";
+import { GeneratorForm } from "../components/GeneratorForm";
+import { ErrorBanner } from "../components/ErrorBanner";
+import { btnPrimary } from "../styles/ui";
+import type { GenerateResponse } from "../types/generateForm";
+import {
+  MIN_CHARS,
+  MAX_CHARS,
+  MAX_NAME_LEN,
+  MAX_TITLE_LEN,
+} from "../utilities/constants";
 
 export default function GeneratorPage() {
   const navigate = useNavigate();
-  const [startupProfileText, setStartupProfileText] = useState('');
-  const [investorProfileText, setInvestorProfileText] = useState('');
-  const [startupName, setStartupName] = useState('');
-  const [investorName, setInvestorName] = useState('');
+  const [startupProfileText, setStartupProfileText] = useState("");
+  const [investorProfileText, setInvestorProfileText] = useState("");
+  const [startupName, setStartupName] = useState("");
+  const [investorName, setInvestorName] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,17 +27,24 @@ export default function GeneratorPage() {
 
   const startupTrim = startupProfileText.trim();
   const investorTrim = investorProfileText.trim();
-  const startupValid = startupTrim.length >= MIN_CHARS && startupTrim.length <= MAX_CHARS;
-  const investorValid = investorTrim.length >= MIN_CHARS && investorTrim.length <= MAX_CHARS;
+  const startupValid =
+    startupTrim.length >= MIN_CHARS && startupTrim.length <= MAX_CHARS;
+  const investorValid =
+    investorTrim.length >= MIN_CHARS && investorTrim.length <= MAX_CHARS;
   const namesValid =
-    startupName.trim().length <= MAX_NAME_LEN && investorName.trim().length <= MAX_NAME_LEN;
+    startupName.trim().length <= MAX_NAME_LEN &&
+    investorName.trim().length <= MAX_NAME_LEN;
+
   const canGenerate = startupValid && investorValid && namesValid && !loading;
+
   const defaultTitleRaw =
     startupName.trim() && investorName.trim()
       ? `${startupName.trim()} ↔ ${investorName.trim()}`
-      : 'Meeting Prep Pack';
+      : "Meeting Prep Pack";
   const defaultTitle = defaultTitleRaw.slice(0, MAX_TITLE_LEN);
-  const titleValid = defaultTitle.length >= 1 && defaultTitle.length <= MAX_TITLE_LEN;
+  const titleValid =
+    defaultTitle.length >= 1 && defaultTitle.length <= MAX_TITLE_LEN;
+
   const canSave =
     Boolean(result?.prepPack) &&
     startupValid &&
@@ -45,7 +57,7 @@ export default function GeneratorPage() {
   const handleGenerate = async () => {
     if (!startupValid || !investorValid || !namesValid) {
       setError(
-        'Startup and investor profiles must be between 80 and 8000 characters. Optional names must be at most 80 characters.'
+        "Startup and investor profiles must be between 80 and 8000 characters. Optional names must be at most 80 characters.",
       );
       return;
     }
@@ -60,7 +72,7 @@ export default function GeneratorPage() {
       });
       setResult(res);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to generate');
+      setError(e instanceof Error ? e.message : "Failed to generate");
     } finally {
       setLoading(false);
     }
@@ -68,10 +80,10 @@ export default function GeneratorPage() {
 
   const handleClear = () => {
     if (loading || saving) return;
-    setStartupProfileText('');
-    setInvestorProfileText('');
-    setStartupName('');
-    setInvestorName('');
+    setStartupProfileText("");
+    setInvestorProfileText("");
+    setStartupName("");
+    setInvestorName("");
     setResult(null);
     setError(null);
     setSaveError(null);
@@ -90,11 +102,13 @@ export default function GeneratorPage() {
         ...(startupName.trim() && { startupName: startupName.trim() }),
         ...(investorName.trim() && { investorName: investorName.trim() }),
         ...(result.meta?.model && { model: result.meta.model }),
-        ...(result.meta?.tokensUsed != null && { tokensUsed: result.meta.tokensUsed }),
+        ...(result.meta?.tokensUsed != null && {
+          tokensUsed: result.meta.tokensUsed,
+        }),
       });
-      navigate(`/notes/${saved.id}`);   
+      navigate(`/notes/${saved.id}`);
     } catch (e) {
-      setSaveError(e instanceof Error ? e.message : 'Failed to save');
+      setSaveError(e instanceof Error ? e.message : "Failed to save");
     } finally {
       setSaving(false);
     }
@@ -103,123 +117,55 @@ export default function GeneratorPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Generate prep pack</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-100">
+          Generate prep pack
+        </h1>
         <p className="text-zinc-400 text-sm">
-          Paste startup and investor profiles below to generate a tailored meeting prep pack summary, fit score, tailored questions, and a 15-minute agenda.
+          Paste startup and investor profiles below to generate a tailored
+          meeting prep pack summary, fit score, tailored questions, and a
+          15-minute agenda.
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="space-y-2">
-          <label className="block font-medium text-zinc-200">Startup profile (required)</label>
-          <textarea
-            className={textareaClass}
-            value={startupProfileText}
-            onChange={(e) => setStartupProfileText(e.target.value)}
-            onKeyDown={(e) => {
-              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && canGenerate) {
-                e.preventDefault();
-                handleGenerate();
-              }
-            }}
-            placeholder="Paste startup profile..."
-          />
-          <p className="text-sm text-zinc-500">
-            {startupProfileText.length} / {MAX_CHARS}
-          </p>
-          {startupTrim.length > 0 && startupTrim.length < MIN_CHARS && (
-            <p className="text-sm text-amber-400">Minimum {MIN_CHARS} characters required</p>
-          )}
-          {startupTrim.length > MAX_CHARS && (
-            <p className="text-sm text-amber-400">Maximum {MAX_CHARS} characters</p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <label className="block font-medium text-zinc-200">Investor profile (required)</label>
-          <textarea
-            className={textareaClass}
-            value={investorProfileText}
-            onChange={(e) => setInvestorProfileText(e.target.value)}
-            onKeyDown={(e) => {
-              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && canGenerate) {
-                e.preventDefault();
-                handleGenerate();
-              }
-            }}
-            placeholder="Paste investor profile..."
-          />
-          <p className="text-sm text-zinc-500">
-            {investorProfileText.length} / {MAX_CHARS}
-          </p>
-          {investorTrim.length > 0 && investorTrim.length < MIN_CHARS && (
-            <p className="text-sm text-amber-400">Minimum {MIN_CHARS} characters required</p>
-          )}
-          {investorTrim.length > MAX_CHARS && (
-            <p className="text-sm text-amber-400">Maximum {MAX_CHARS} characters</p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="block font-medium text-sm text-zinc-200">Startup name (optional)</label>
-          <input
-            type="text"
-            className={inputCompact}
-            value={startupName}
-            onChange={(e) => setStartupName(e.target.value)}
-            placeholder="e.g. Acme Inc"
-            maxLength={MAX_NAME_LEN}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="block font-medium text-sm text-zinc-200">Investor name (optional)</label>
-          <input
-            type="text"
-            className={inputCompact}
-            value={investorName}
-            onChange={(e) => setInvestorName(e.target.value)}
-            placeholder="e.g. Sequoia"
-            maxLength={MAX_NAME_LEN}
-          />
-        </div>
-      </div>
-
-      {error && <ErrorBanner message={error} />}
-
-      <div className="flex gap-3">
-        <button type="button" onClick={handleGenerate} disabled={!canGenerate} className={btnPrimary}>
-          Generate
-        </button>
-        <button
-          type="button"
-          onClick={handleClear}
-          disabled={loading || saving}
-          className={btnSecondary}
-        >
-          Clear
-        </button>
-      </div>
-
-      {loading && <LoadingSpinner />}
+      <GeneratorForm
+        startupProfileText={startupProfileText}
+        setStartupProfileText={setStartupProfileText}
+        investorProfileText={investorProfileText}
+        setInvestorProfileText={setInvestorProfileText}
+        startupName={startupName}
+        setStartupName={setStartupName}
+        investorName={investorName}
+        setInvestorName={setInvestorName}
+        canGenerate={canGenerate}
+        loading={loading}
+        saving={saving}
+        error={error}
+        onGenerate={handleGenerate}
+        onClear={handleClear}
+      />
 
       {result?.prepPack && (
         <div className="space-y-4 rounded-xl border border-white/10 bg-zinc-900/60 p-6 pt-4">
           <h2 className="text-xl font-semibold text-zinc-100">Prep pack</h2>
           {result.meta && (
             <div className="text-sm text-zinc-500 space-y-0.5">
-              {result.meta.model != null && result.meta.model !== '' && (
+              {result.meta.model != null && result.meta.model !== "" && (
                 <p>Model: {result.meta.model}</p>
               )}
               {result.meta.repaired != null && (
-                <p>Repaired: {result.meta.repaired ? 'yes' : 'no'}</p>
+                <p>Repaired: {result.meta.repaired ? "yes" : "no"}</p>
               )}
             </div>
           )}
           <PrepPackView result={result.prepPack} />
           {saveError && <ErrorBanner message={saveError} />}
-          <button type="button" onClick={handleSave} disabled={!canSave} className={btnPrimary}>
-            {saving ? 'Saving…' : 'Save as note'}
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!canSave}
+            className={btnPrimary}
+          >
+            {saving ? "Saving…" : "Save as note"}
           </button>
         </div>
       )}

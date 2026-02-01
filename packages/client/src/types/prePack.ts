@@ -1,4 +1,7 @@
-/** Structured prep pack result from generate or stored in DB */
+export interface PrepPackViewProps {
+  result: PrepPackResult;
+}
+
 export interface PrepPackResult {
   startupSummary: string[];
   fitScore: number;
@@ -9,22 +12,6 @@ export interface PrepPackResult {
     min2_7: string[];
     min7_12: string[];
     min12_15: string[];
-  };
-}
-
-export interface GenerateRequest {
-  startupProfileText: string;
-  investorProfileText: string;
-  startupName?: string;
-  investorName?: string;
-}
-
-export interface GenerateResponse {
-  prepPack: PrepPackResult;
-  meta?: {
-    model?: string;
-    repaired?: boolean;
-    tokensUsed?: number;
   };
 }
 
@@ -48,15 +35,6 @@ export interface UpdatePrepPackRequest {
   investorProfileText?: string;
 }
 
-export interface PrepPackListItem {
-  id: string;
-  createdAt: string;
-  title: string;
-  startupName?: string | null;
-  investorName?: string | null;
-  fitScore?: number | null;
-}
-
 export interface PrepPackDetail {
   id: string;
   createdAt: string;
@@ -69,4 +47,13 @@ export interface PrepPackDetail {
   resultJson: PrepPackResult;
   model?: string | null;
   tokensUsed?: number | null;
+}
+
+export interface PrepPackListItem {
+  id: string;
+  createdAt: string;
+  title: string;
+  startupName?: string | null;
+  investorName?: string | null;
+  fitScore?: number | null;
 }

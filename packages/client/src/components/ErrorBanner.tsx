@@ -1,6 +1,4 @@
-interface ErrorBannerProps {
-  message: string;
-}
+import type { ErrorBannerProps } from "../types/errors";
 
 export function ErrorBanner({ message }: ErrorBannerProps) {
   return (

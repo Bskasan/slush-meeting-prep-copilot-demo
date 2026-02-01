@@ -31,6 +31,7 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
         new HttpError(
           400,
           "Input looks too low-detail. Please paste real startup and investor profiles.",
+          "LOW_SIGNAL_INPUT",
         ),
       );
       return;

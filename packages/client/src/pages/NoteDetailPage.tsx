@@ -3,36 +3,12 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchPrepPackById, updatePrepPack, deletePrepPack } from '../lib/api';
 import type { PrepPackDetail, PrepPackResult } from '../types';
 import { PrepPackView } from '../components/PrepPackView';
+import { ConfirmationModal } from '../components/ConfirmationModal';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return iso;
-  }
-}
-
-function isAbortError(e: unknown): boolean {
-  if (e instanceof Error && e.name === 'AbortError') return true;
-  if (e instanceof Error && /aborted/i.test(e.message)) return true;
-  if (typeof e === 'object' && e !== null && 'name' in e && (e as { name: string }).name === 'AbortError') return true;
-  return false;
-}
-
-const chipClass =
-  'inline-flex items-center rounded-full border border-white/5 bg-zinc-800 px-2 py-1 text-xs text-zinc-400';
-
-const inputBase =
-  'w-full rounded-xl border border-white/10 bg-zinc-900/60 px-4 py-3 text-zinc-100 placeholder-zinc-500 transition focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
-const textareaClass = `${inputBase} min-h-[120px] resize-y`;
-const btnPrimary =
-  'px-4 py-2 rounded-xl font-medium text-white bg-cyan-500 hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-cyan-500';
-const btnSecondary =
-  'px-4 py-2 rounded-xl font-medium text-zinc-200 border border-white/10 bg-zinc-800 hover:bg-zinc-700 hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 transition disabled:opacity-50 disabled:cursor-not-allowed';
-const btnDanger =
-  'px-4 py-2 rounded-xl font-medium text-white bg-red-600/80 hover:bg-red-600 border border-red-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 transition disabled:opacity-50 disabled:cursor-not-allowed';
+import { inputCompact, textareaClass, btnPrimary, btnSecondary, btnDanger, chipClass } from '../styles/ui';
+import { isAbortError } from '../utilities/errors';
+import { formatDate } from '../utilities/dateFormat';
 
 export default function NoteDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -48,6 +24,7 @@ export default function NoteDetailPage() {
   const [editInvestorName, setEditInvestorName] = useState('');
   const [editStartupProfileText, setEditStartupProfileText] = useState('');
   const [editInvestorProfileText, setEditInvestorProfileText] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -78,13 +55,13 @@ export default function NoteDetailPage() {
     }
   }, [note]);
 
-  const handleDelete = async () => {
+  const handleDeleteConfirm = async () => {
     if (!id || deleting) return;
-    if (!window.confirm('Delete this note?')) return;
     setActionError(null);
     setDeleting(true);
     try {
       await deletePrepPack(id);
+      setShowDeleteModal(false);
       navigate('/notes');
     } catch (e) {
       setActionError(e instanceof Error ? e.message : 'Failed to delete');
@@ -152,7 +129,7 @@ export default function NoteDetailPage() {
             </button>
             <button
               type="button"
-              onClick={handleDelete}
+              onClick={() => setShowDeleteModal(true)}
               disabled={deleting}
               className={btnDanger}
             >
@@ -173,7 +150,7 @@ export default function NoteDetailPage() {
               type="text"
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              className={`${inputBase} py-2`}
+              className={inputCompact}
               placeholder="Note title"
               required
             />
@@ -185,7 +162,7 @@ export default function NoteDetailPage() {
                 type="text"
                 value={editStartupName}
                 onChange={(e) => setEditStartupName(e.target.value)}
-                className={`${inputBase} py-2`}
+                className={inputCompact}
                 placeholder="e.g. Acme Inc"
               />
             </div>
@@ -195,7 +172,7 @@ export default function NoteDetailPage() {
                 type="text"
                 value={editInvestorName}
                 onChange={(e) => setEditInvestorName(e.target.value)}
-                className={`${inputBase} py-2`}
+                className={inputCompact}
                 placeholder="e.g. Sequoia"
               />
             </div>
@@ -246,6 +223,18 @@ export default function NoteDetailPage() {
       )}
 
       <PrepPackView result={result} />
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete note"
+        description="Are you sure you want to delete this note? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        confirmVariant="danger"
+        isLoading={deleting}
+      />
 
       <section>
         <details className="group rounded-xl border border-white/10 bg-zinc-900/60 overflow-hidden">

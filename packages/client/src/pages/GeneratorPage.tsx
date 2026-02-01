@@ -5,14 +5,7 @@ import type { GenerateResponse } from '../types';
 import { PrepPackView } from '../components/PrepPackView';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-
-const inputBase =
-  'w-full rounded-xl border border-white/10 bg-zinc-900/60 px-4 py-3 text-zinc-100 placeholder-zinc-500 transition focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
-const textareaClass = `${inputBase} min-h-[120px] resize-y`;
-const btnPrimary =
-  'px-4 py-2 rounded-xl font-medium text-white bg-cyan-500 hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-cyan-500';
-const btnSecondary =
-  'px-4 py-2 rounded-xl font-medium text-zinc-200 border border-white/10 bg-zinc-800 hover:bg-zinc-700 hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 transition disabled:opacity-50 disabled:cursor-not-allowed';
+import { inputCompact, textareaClass, btnPrimary, btnSecondary } from '../styles/ui';
 
 export default function GeneratorPage() {
   const navigate = useNavigate();
@@ -89,7 +82,7 @@ export default function GeneratorPage() {
         ...(result.meta?.model && { model: result.meta.model }),
         ...(result.meta?.tokensUsed != null && { tokensUsed: result.meta.tokensUsed }),
       });
-      navigate(`/notes/${saved.id}`);
+      navigate(`/notes/${saved.id}`);   
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Failed to save');
     } finally {
@@ -141,7 +134,7 @@ export default function GeneratorPage() {
           <label className="block font-medium text-sm text-zinc-200">Startup name (optional)</label>
           <input
             type="text"
-            className={`${inputBase} py-2`}
+            className={inputCompact}
             value={startupName}
             onChange={(e) => setStartupName(e.target.value)}
             placeholder="e.g. Acme Inc"
@@ -151,7 +144,7 @@ export default function GeneratorPage() {
           <label className="block font-medium text-sm text-zinc-200">Investor name (optional)</label>
           <input
             type="text"
-            className={`${inputBase} py-2`}
+            className={inputCompact}
             value={investorName}
             onChange={(e) => setInvestorName(e.target.value)}
             placeholder="e.g. Sequoia"

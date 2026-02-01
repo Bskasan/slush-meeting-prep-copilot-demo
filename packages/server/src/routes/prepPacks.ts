@@ -3,6 +3,7 @@ import PrepPackRepository from "../utilities/database/repositories/PrepPack";
 import { sendRepoResult } from "../utilities/http/sendRepoResult";
 import { savePrepPackRequestSchema } from "../schemas";
 import { ListItem } from "../types/prepPacks";
+import { HttpError } from "../utilities/errors";
 
 const router = express.Router();
 const prepPackRepo = new PrepPackRepository();
@@ -34,11 +35,15 @@ function toListItem(row: {
   };
 }
 
+function getRequestId(req: Request): string | undefined {
+  return (req as Request & { requestId?: string }).requestId;
+}
+
 // GET: Fetch all saved packs (minimal list: id, createdAt, title, startupName, investorName, fitScore)
-router.get("/", async (_req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   const result = await prepPackRepo.getAllPrepPacks();
   if (!result.ok) {
-    sendRepoResult(res, result);
+    sendRepoResult(res, result, { requestId: getRequestId(req) });
     return;
   }
 
@@ -51,7 +56,7 @@ router.get("/", async (_req: Request, res: Response) => {
 router.get("/:id", async (req: Request, res: Response) => {
   const id = String(req.params.id);
   const result = await prepPackRepo.getPrepPackById(id);
-  sendRepoResult(res, result);
+  sendRepoResult(res, result, { requestId: getRequestId(req) });
 });
 
 // POST: Create a new prep pack
@@ -92,7 +97,10 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
     };
 
     const result = await prepPackRepo.createPrepPack(createData);
-    sendRepoResult(res, result, { successStatus: 201 });
+    sendRepoResult(res, result, {
+      successStatus: 201,
+      requestId: getRequestId(req),
+    });
   } catch (err) {
     console.error("POST /api/prep-packs error:", err);
     next(err);
@@ -100,26 +108,33 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // PATCH: Update a prep pack
-router.patch("/:id", async (req: Request, res: Response) => {
-  if (!validatePatchBody(req.body)) {
-    res
-      .status(400)
-      .json({ error: "Must be a JSON object for partial update." });
-    return;
-  }
+router.patch(
+  "/:id",
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!validatePatchBody(req.body)) {
+      next(
+        new HttpError(
+          400,
+          "Must be a JSON object for partial update.",
+          "VALIDATION_ERROR",
+        ),
+      );
+      return;
+    }
 
-  const id = String(req.params.id);
-  const result = await prepPackRepo.updatePrepPack(id, req.body);
+    const id = String(req.params.id);
+    const result = await prepPackRepo.updatePrepPack(id, req.body);
 
-  sendRepoResult(res, result);
-});
+    sendRepoResult(res, result, { requestId: getRequestId(req) });
+  },
+);
 
 // DELETE: Remove a prep pack
 router.delete("/:id", async (req: Request, res: Response) => {
   const id = String(req.params.id);
   const result = await prepPackRepo.deletePrepPack(id);
 
-  sendRepoResult(res, result);
+  sendRepoResult(res, result, { requestId: getRequestId(req) });
 });
 
 export default router;

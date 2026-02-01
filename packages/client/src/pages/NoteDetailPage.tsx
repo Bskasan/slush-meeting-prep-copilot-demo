@@ -113,7 +113,19 @@ export default function NoteDetailPage() {
   };
 
   if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorBanner message={error} />;
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <ErrorBanner message={error} />
+        <Link
+          to="/notes"
+          className="inline-flex text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+        >
+          Back to notes
+        </Link>
+      </div>
+    );
+  }
   if (!note) return <p className="text-zinc-500">Note not found.</p>;
 
   const result = note.resultJson as PrepPackResult;

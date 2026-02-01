@@ -8,6 +8,32 @@ import type {
 } from "../types/prePack";
 import { BASE_URL } from "../utilities/constants";
 
+/** Parse error body from a non-2xx response. Returns a user-safe message. */
+export async function parseApiError(res: Response): Promise<string> {
+  try {
+    const data = await res.json();
+    if (typeof data?.error === "string") return data.error;
+    if (data?.error?.message && typeof data.error.message === "string")
+      return data.error.message;
+    if (typeof data?.message === "string") return data.message;
+  } catch {
+    // body is not JSON
+  }
+  if (res.status === 429) return "Too many requests. Please try again later.";
+  if (res.status === 502 || res.status === 504)
+    return "Generation failed. Please try again.";
+  if (res.status >= 400 && res.status < 500)
+    return res.statusText || "Request failed.";
+  return "Something went wrong. Please try again.";
+}
+
+function messageForStatus(status: number, parsed: string): string {
+  if (status === 429) return "Too many requests. Please try again later.";
+  if (status === 502 || status === 504)
+    return "Generation failed. Please try again.";
+  return parsed || "Something went wrong. Please try again.";
+}
+
 async function apiFetch<T>(
   path: string,
   options: ApiFetchOptions = {},
@@ -32,23 +58,16 @@ async function apiFetch<T>(
     const msg =
       e instanceof TypeError &&
       (e.message === "Failed to fetch" || e.message.includes("fetch"))
-        ? "Cannot connect to the API. Make sure the server is running (e.g. npm run dev in packages/server)."
+        ? "Network error. Check your connection."
         : e instanceof Error
           ? e.message
-          : "Network error";
+          : "Network error. Check your connection.";
     throw new Error(msg);
   }
 
   if (!res.ok) {
-    let message = res.statusText;
-    try {
-      const data = await res.json();
-      if (typeof data?.error === "string") message = data.error;
-      else if (data?.error?.message) message = data.error.message;
-      else if (typeof data?.message === "string") message = data.message;
-    } catch {
-      // use statusText
-    }
+    const parsed = await parseApiError(res);
+    const message = messageForStatus(res.status, parsed);
     throw new Error(message);
   }
 

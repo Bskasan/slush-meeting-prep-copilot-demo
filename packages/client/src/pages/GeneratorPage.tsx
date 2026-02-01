@@ -62,6 +62,7 @@ export default function GeneratorPage() {
       return;
     }
     setError(null);
+    setSaveError(null);
     setLoading(true);
     try {
       const res = await generatePrepPack({

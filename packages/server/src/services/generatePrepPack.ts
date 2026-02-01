@@ -43,7 +43,11 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
       setTimeout(
         () =>
           reject(
-            new HttpError(504, "LLM request timed out. Please try again."),
+            new HttpError(
+              504,
+              "LLM request timed out. Please try again.",
+              "LLM_TIMEOUT",
+            ),
           ),
         ms,
       ),
@@ -179,42 +183,48 @@ export async function generatePrepPack(
   let repaired = false;
   let tokensUsed: number | undefined;
 
-  const response = await withTimeout(
-    model.invoke([systemMessage, humanMessage]),
-    LLM_TIMEOUT_MS,
-  );
-  const raw =
-    typeof response.content === "string"
-      ? response.content
-      : String(response.content ?? "");
-  const parsed = parseJsonOrThrow(raw, context);
-  const firstResult = prepPackResultSchema.safeParse(parsed);
-  if (firstResult.success) {
-    prepPack = firstResult.data;
-    tokensUsed = getTokensUsed(response);
-  } else {
-    const summary = firstResult.error.errors
-      .map((e) => `${e.path.join(".")}: ${e.message}`)
-      .join("; ");
-    const repairMessage = new HumanMessage(buildRepairPrompt(raw, summary));
-    const repairResponse = await withTimeout(
-      model.invoke([systemMessage, repairMessage]),
+  try {
+    const response = await withTimeout(
+      model.invoke([systemMessage, humanMessage]),
       LLM_TIMEOUT_MS,
     );
-    const repairRaw =
-      typeof repairResponse.content === "string"
-        ? repairResponse.content
-        : String(repairResponse.content ?? "");
-    context.repaired = true;
-    const repairParsed = parseJsonOrThrow(repairRaw, context);
-    const repairResult = prepPackResultSchema.safeParse(repairParsed);
-    if (!repairResult.success) {
-      logParseFailure("validation failed", context);
-      throw new LLMOutputInvalidError("LLM output invalid");
+    const raw =
+      typeof response.content === "string"
+        ? response.content
+        : String(response.content ?? "");
+    const parsed = parseJsonOrThrow(raw, context);
+    const firstResult = prepPackResultSchema.safeParse(parsed);
+    if (firstResult.success) {
+      prepPack = firstResult.data;
+      tokensUsed = getTokensUsed(response);
+    } else {
+      const summary = firstResult.error.errors
+        .map((e) => `${e.path.join(".")}: ${e.message}`)
+        .join("; ");
+      const repairMessage = new HumanMessage(buildRepairPrompt(raw, summary));
+      const repairResponse = await withTimeout(
+        model.invoke([systemMessage, repairMessage]),
+        LLM_TIMEOUT_MS,
+      );
+      const repairRaw =
+        typeof repairResponse.content === "string"
+          ? repairResponse.content
+          : String(repairResponse.content ?? "");
+      context.repaired = true;
+      const repairParsed = parseJsonOrThrow(repairRaw, context);
+      const repairResult = prepPackResultSchema.safeParse(repairParsed);
+      if (!repairResult.success) {
+        logParseFailure("validation failed", context);
+        throw new LLMOutputInvalidError("LLM output invalid");
+      }
+      prepPack = repairResult.data;
+      repaired = true;
+      tokensUsed = getTokensUsed(repairResponse);
     }
-    prepPack = repairResult.data;
-    repaired = true;
-    tokensUsed = getTokensUsed(repairResponse);
+  } catch (err) {
+    if (err instanceof HttpError || err instanceof LLMOutputInvalidError)
+      throw err;
+    throw new HttpError(502, "Generation failed. Please try again.");
   }
 
   return {

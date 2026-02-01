@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { Bucket, RateLimitOptions } from "../types/rateLimiter";
+import { HttpError } from "../utilities/errors";
 
 const store = new Map<string, Bucket>();
 
@@ -32,9 +33,13 @@ export function createRateLimiter(
 
     bucket.count++;
     if (bucket.count > maxRequests) {
-      res
-        .status(429)
-        .json({ error: "Too many requests. Please try again later." });
+      next(
+        new HttpError(
+          429,
+          "Too many requests. Please try again later.",
+          "RATE_LIMITED",
+        ),
+      );
       return;
     }
     next();

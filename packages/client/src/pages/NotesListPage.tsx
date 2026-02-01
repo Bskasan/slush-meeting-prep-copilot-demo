@@ -6,7 +6,7 @@ import { ConfirmationModal } from "../components/ConfirmationModal";
 import { ErrorBanner } from "../components/ErrorBanner";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { formatDate } from "../utilities/dateFormat";
-import { btnDangerSmall } from "../styles/ui";
+import { btnDangerSmall, btnPrimary } from "../styles/ui";
 
 export default function NotesListPage() {
   const [items, setItems] = useState<PrepPackListItem[]>([]);
@@ -18,8 +18,11 @@ export default function NotesListPage() {
   const [deleteModalId, setDeleteModalId] = useState<string | null>(null);
 
   const [listError, setListError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     const ac = new AbortController();
     fetchPrepPacks(ac.signal)
       .then(setItems)
@@ -35,7 +38,13 @@ export default function NotesListPage() {
         if (!ac.signal.aborted) setLoading(false);
       });
     return () => ac.abort();
-  }, []);
+  }, [retryKey]);
+
+  const handleRetry = () => {
+    setError(null);
+    setLoading(true);
+    setRetryKey((k) => k + 1);
+  };
 
   const handleDeleteClick = (e: React.MouseEvent, itemId: string) => {
     e.preventDefault();
@@ -59,7 +68,16 @@ export default function NotesListPage() {
   };
 
   if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorBanner message={error} />;
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <ErrorBanner message={error} />
+        <button type="button" onClick={handleRetry} className={btnPrimary}>
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -1,14 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-
-interface Bucket {
-  count: number;
-  resetAt: number;
-}
-
-export interface RateLimitOptions {
-  windowMs: number;
-  maxRequests: number;
-}
+import { Bucket, RateLimitOptions } from "../types/rateLimiter";
 
 const store = new Map<string, Bucket>();
 
@@ -22,7 +13,9 @@ function cleanupExpired(): void {
 /**
  * In-memory rate limiter. Keys by req.ip. Lazy-cleans expired buckets.
  */
-export function createRateLimiter(options: RateLimitOptions): (req: Request, res: Response, next: NextFunction) => void {
+export function createRateLimiter(
+  options: RateLimitOptions,
+): (req: Request, res: Response, next: NextFunction) => void {
   const { windowMs, maxRequests } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
@@ -39,7 +32,9 @@ export function createRateLimiter(options: RateLimitOptions): (req: Request, res
 
     bucket.count++;
     if (bucket.count > maxRequests) {
-      res.status(429).json({ error: "Too many requests. Please try again later." });
+      res
+        .status(429)
+        .json({ error: "Too many requests. Please try again later." });
       return;
     }
     next();

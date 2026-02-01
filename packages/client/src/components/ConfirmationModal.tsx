@@ -1,17 +1,6 @@
-import { useEffect, useCallback } from 'react';
-import { btnPrimary, btnSecondary, btnDanger } from '../styles/ui';
-
-export interface ConfirmationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  description?: React.ReactNode;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  confirmVariant?: 'default' | 'danger';
-  isLoading?: boolean;
-}
+import { useEffect, useCallback } from "react";
+import { btnPrimary, btnSecondary, btnDanger } from "../styles/ui";
+import type { ConfirmationModalProps } from "../types/confirmationModal";
 
 export function ConfirmationModal({
   isOpen,
@@ -19,25 +8,25 @@ export function ConfirmationModal({
   onConfirm,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
-  confirmVariant = 'default',
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  confirmVariant = "default",
   isLoading = false,
 }: ConfirmationModalProps) {
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     },
-    [onClose]
+    [onClose],
   );
 
   useEffect(() => {
     if (!isOpen) return;
-    document.addEventListener('keydown', handleEscape);
-    document.body.style.overflow = 'hidden';
+    document.addEventListener("keydown", handleEscape);
+    document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "";
     };
   }, [isOpen, handleEscape]);
 
@@ -47,7 +36,7 @@ export function ConfirmationModal({
 
   if (!isOpen) return null;
 
-  const confirmClassName = confirmVariant === 'danger' ? btnDanger : btnPrimary;
+  const confirmClassName = confirmVariant === "danger" ? btnDanger : btnPrimary;
 
   return (
     <div
@@ -56,17 +45,25 @@ export function ConfirmationModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirmation-modal-title"
-      aria-describedby={description ? 'confirmation-modal-description' : undefined}
+      aria-describedby={
+        description ? "confirmation-modal-description" : undefined
+      }
     >
       <div
         className="w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="confirmation-modal-title" className="text-lg font-semibold text-zinc-100">
+        <h2
+          id="confirmation-modal-title"
+          className="text-lg font-semibold text-zinc-100"
+        >
           {title}
         </h2>
         {description != null && (
-          <div id="confirmation-modal-description" className="mt-2 text-zinc-400">
+          <div
+            id="confirmation-modal-description"
+            className="mt-2 text-zinc-400"
+          >
             {description}
           </div>
         )}
@@ -85,7 +82,7 @@ export function ConfirmationModal({
             disabled={isLoading}
             className={confirmClassName}
           >
-            {isLoading ? 'Loading…' : confirmLabel}
+            {isLoading ? "Loading…" : confirmLabel}
           </button>
         </div>
       </div>

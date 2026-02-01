@@ -1,15 +1,18 @@
 import { z } from "zod";
-
-/** Length limits for profile text and names (reuse across generate + prep-packs). */
-export const MIN_CHARS = 80;
-export const MAX_CHARS = 8000;
-export const MAX_NAME_LEN = 80;
-export const MAX_TITLE_LEN = 120;
+import {
+  MAX_CHARS,
+  MAX_NAME_LEN,
+  MAX_TITLE_LEN,
+  MIN_CHARS,
+} from "../utilities/constants";
 
 const profileTextSchema = z
   .string()
   .trim()
-  .min(MIN_CHARS, "Startup and investor profiles must be at least 80 characters.")
+  .min(
+    MIN_CHARS,
+    "Startup and investor profiles must be at least 80 characters.",
+  )
   .max(MAX_CHARS);
 
 const optionalNameSchema = z.string().trim().max(MAX_NAME_LEN).optional();

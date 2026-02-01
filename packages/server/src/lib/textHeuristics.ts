@@ -1,4 +1,4 @@
-import { MIN_CHARS } from "../schemas";
+import { MIN_CHARS } from "../utilities/constants";
 
 /**
  * Lightweight heuristic to reject obvious garbage / low-signal text before calling the LLM.

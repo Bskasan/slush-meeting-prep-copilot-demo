@@ -1,4 +1,4 @@
-/** Length limits for generator form (mirror server schemas). */
+/** Length limits for profile text and names (reuse across generate + prep-packs). */
 export const MIN_CHARS = 80;
 export const MAX_CHARS = 8000;
 export const MAX_NAME_LEN = 80;

@@ -1,28 +1,22 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { fetchPrepPacks, deletePrepPack } from '../lib/api';
-import type { PrepPackListItem } from '../types';
-import { ConfirmationModal } from '../components/ConfirmationModal';
-import { ErrorBanner } from '../components/ErrorBanner';
-import { LoadingSpinner } from '../components/LoadingSpinner';
-
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return iso;
-  }
-}
-
-const btnDangerSmall =
-  'px-2 py-1 rounded-lg text-xs font-medium text-red-300 border border-red-500/30 bg-red-900/20 hover:bg-red-900/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 transition disabled:opacity-50 disabled:cursor-not-allowed';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { fetchPrepPacks, deletePrepPack } from "../lib/api";
+import type { PrepPackListItem } from "../types/prePack";
+import { ConfirmationModal } from "../components/ConfirmationModal";
+import { ErrorBanner } from "../components/ErrorBanner";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { formatDate } from "../utilities/dateFormat";
+import { btnDangerSmall } from "../styles/ui";
 
 export default function NotesListPage() {
   const [items, setItems] = useState<PrepPackListItem[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteModalId, setDeleteModalId] = useState<string | null>(null);
+
   const [listError, setListError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,8 +24,12 @@ export default function NotesListPage() {
     fetchPrepPacks(ac.signal)
       .then(setItems)
       .catch((e) => {
-        if (e instanceof Error && (e.name === 'AbortError' || /aborted/i.test(e.message))) return;
-        setError(e instanceof Error ? e.message : 'Failed to load notes');
+        if (
+          e instanceof Error &&
+          (e.name === "AbortError" || /aborted/i.test(e.message))
+        )
+          return;
+        setError(e instanceof Error ? e.message : "Failed to load notes");
       })
       .finally(() => {
         if (!ac.signal.aborted) setLoading(false);
@@ -54,7 +52,7 @@ export default function NotesListPage() {
       setItems((prev) => prev.filter((i) => i.id !== deleteModalId));
       setDeleteModalId(null);
     } catch (err) {
-      setListError(err instanceof Error ? err.message : 'Failed to delete');
+      setListError(err instanceof Error ? err.message : "Failed to delete");
     } finally {
       setDeletingId(null);
     }
@@ -67,6 +65,7 @@ export default function NotesListPage() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Notes</h1>
       {listError && <ErrorBanner message={listError} />}
+
       {items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-white/10 bg-zinc-900/40 p-8 text-center text-zinc-500">
           No saved prep packs yet. Generate one from the Generate page.
@@ -77,12 +76,11 @@ export default function NotesListPage() {
             {items.map((item) => (
               <li key={item.id}>
                 <div className="flex items-start gap-2 rounded-xl border border-white/10 bg-zinc-900/60 p-4 transition-colors hover:border-cyan-400/30 hover:bg-zinc-900/80">
-                  <Link
-                    to={`/notes/${item.id}`}
-                    className="flex-1 min-w-0"
-                  >
+                  <Link to={`/notes/${item.id}`} className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium text-zinc-100">{item.title}</span>
+                      <span className="font-medium text-zinc-100">
+                        {item.title}
+                      </span>
                       {item.fitScore != null && (
                         <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-xs font-medium text-cyan-300">
                           {item.fitScore}/100
@@ -93,7 +91,10 @@ export default function NotesListPage() {
                       {formatDate(item.createdAt)}
                       {(item.startupName || item.investorName) && (
                         <span className="ml-2">
-                          · {[item.startupName, item.investorName].filter(Boolean).join(' · ')}
+                          ·{" "}
+                          {[item.startupName, item.investorName]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </span>
                       )}
                     </div>
@@ -105,7 +106,7 @@ export default function NotesListPage() {
                     className={btnDangerSmall}
                     title="Delete note"
                   >
-                    {deletingId === item.id ? 'Deleting…' : 'Delete'}
+                    {deletingId === item.id ? "Deleting…" : "Delete"}
                   </button>
                 </div>
               </li>

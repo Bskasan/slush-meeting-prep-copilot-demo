@@ -7,11 +7,12 @@ declare global {
   var __generatePrepPackMockInvoke: jest.Mock | undefined;
 }
 
-jest.mock("@langchain/openai", () => {
-  const invoke = jest.fn();
-  globalThis.__generatePrepPackMockInvoke = invoke;
-  return { ChatOpenAI: jest.fn(() => ({ invoke })) };
-});
+const mockInvoke = jest.fn();
+globalThis.__generatePrepPackMockInvoke = mockInvoke;
+
+jest.mock("../createChatModel", () => ({
+  createChatModel: jest.fn(() => ({ invoke: mockInvoke })),
+}));
 
 jest.mock("../../config", () => ({
   OPENAI_API_KEY: "test-key",
@@ -32,7 +33,9 @@ function getMockInvoke(): jest.Mock {
 function llmResponse(content: string, totalTokens?: number) {
   return {
     content,
-    ...(totalTokens != null && { usage_metadata: { total_tokens: totalTokens } }),
+    ...(totalTokens != null && {
+      usage_metadata: { total_tokens: totalTokens },
+    }),
   };
 }
 
@@ -62,19 +65,32 @@ describe("generatePrepPack", () => {
       .mockResolvedValueOnce(llmResponse('{"fitScore": 999}'))
       .mockResolvedValueOnce(llmResponse('{"wrong": "shape"}'));
 
-    await expect(generatePrepPack(validInput)).rejects.toThrow(LLMOutputInvalidError);
+    await expect(generatePrepPack(validInput)).rejects.toThrow(
+      LLMOutputInvalidError,
+    );
     expect(mockInvoke).toHaveBeenCalledTimes(2);
   });
 
   it("extra text around JSON → success, repaired=false", async () => {
-    const mockInvoke = getMockInvoke();
+    const invoke = getMockInvoke();
     const wrapped = `Sure! ${JSON.stringify(validPrepPackResult)} Thanks`;
-    mockInvoke.mockResolvedValueOnce(llmResponse(wrapped));
+    invoke.mockResolvedValueOnce(llmResponse(wrapped));
 
     const result = await generatePrepPack(validInput);
 
     expect(result.prepPack).toEqual(validPrepPackResult);
     expect(result.meta.repaired).toBe(false);
-    expect(mockInvoke).toHaveBeenCalledTimes(1);
+    expect(invoke).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns tokensUsed when response has usage_metadata.total_tokens", async () => {
+    const invoke = getMockInvoke();
+    invoke.mockResolvedValueOnce(
+      llmResponse(JSON.stringify(validPrepPackResult), 42),
+    );
+
+    const result = await generatePrepPack(validInput);
+
+    expect(result.meta.tokensUsed).toBe(42);
   });
 });

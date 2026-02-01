@@ -3,10 +3,15 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import GeneratorPage from "../GeneratorPage";
 import { generatePrepPack, savePrepPack } from "../../lib/api";
-import type { GenerateResponse, PrepPackDetail, PrepPackResult } from "../../types";
+import type { GenerateResponse } from "../../types/generateForm";
+import type { PrepPackDetail, PrepPackResult } from "../../types/prePack";
 
-const mockGeneratePrepPack = generatePrepPack as jest.MockedFunction<typeof generatePrepPack>;
-const mockSavePrepPack = savePrepPack as jest.MockedFunction<typeof savePrepPack>;
+const mockGeneratePrepPack = generatePrepPack as jest.MockedFunction<
+  typeof generatePrepPack
+>;
+const mockSavePrepPack = savePrepPack as jest.MockedFunction<
+  typeof savePrepPack
+>;
 
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -42,7 +47,7 @@ function renderGeneratorPage() {
       <Routes>
         <Route path="/" element={<GeneratorPage />} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 
@@ -68,13 +73,17 @@ describe("GeneratorPage", () => {
       () =>
         new Promise((resolve) => {
           resolveGenerate = resolve;
-        })
+        }),
     );
 
     renderGeneratorPage();
 
-    const startupTextarea = screen.getByPlaceholderText(/paste startup profile/i);
-    const investorTextarea = screen.getByPlaceholderText(/paste investor profile/i);
+    const startupTextarea = screen.getByPlaceholderText(
+      /paste startup profile/i,
+    );
+    const investorTextarea = screen.getByPlaceholderText(
+      /paste investor profile/i,
+    );
     await userEvent.type(startupTextarea, validProfileText);
     await userEvent.type(investorTextarea, validProfileText);
 
@@ -97,14 +106,20 @@ describe("GeneratorPage", () => {
 
     renderGeneratorPage();
 
-    const startupTextarea = screen.getByPlaceholderText(/paste startup profile/i);
-    const investorTextarea = screen.getByPlaceholderText(/paste investor profile/i);
+    const startupTextarea = screen.getByPlaceholderText(
+      /paste startup profile/i,
+    );
+    const investorTextarea = screen.getByPlaceholderText(
+      /paste investor profile/i,
+    );
     await userEvent.type(startupTextarea, validProfileText);
     await userEvent.type(investorTextarea, validProfileText);
 
     await userEvent.click(screen.getByRole("button", { name: /^generate$/i }));
 
-    const saveBtn = await screen.findByRole("button", { name: /save as note/i });
+    const saveBtn = await screen.findByRole("button", {
+      name: /save as note/i,
+    });
 
     await userEvent.click(saveBtn);
 

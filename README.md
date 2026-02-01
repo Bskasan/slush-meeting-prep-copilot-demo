@@ -1,12 +1,12 @@
 # Meeting Prep Copilot
 
-**Meeting Prep Copilot** is a PERN-stack app for the Slush Software Engineer Assignment 2026 (Option 1: LLM-Based Application). Users paste startup and investor profile text; the app generates a structured **meeting prep pack** (JSON) via an LLM, and users can save and browse these as notes (list and detail views).
+**Meeting Prep Copilot** is a PERN-stack app for the Slush Software Developer Assignment 2026 (Option 1: LLM-Based Application). Users paste startup and investor profile text; the app generates a structured **meeting prep pack** (JSON) via an LLM, and users can save and browse these as notes (list and detail views).
 
 ---
 
-## Demo links (placeholders — replace before submission)
+## Demo
 
-- **Deployed app:** [https://slush-meeting-prep-copilot-demo-cli.vercel.app/](https://slush-meeting-prep-copilot-demo-cli.vercel.app/)
+- **Deployed app:** [https://slush-meeting-prep-copilot-demo-cli.vercel.app/](https://slush-meeting-prep-copilot-demo-cli.vercel.app/) — replace with your final URL (or provide a screen recording) when submitting.
 
 ---
 
@@ -22,14 +22,14 @@
 
 ## Tech Stack
 
-| Layer      | Technology                                                             |
-| ---------- | ---------------------------------------------------------------------- |
-| Client     | React 19, Vite, TypeScript, Tailwind CSS, React Router, Axios          |
-| API        | Express 5, Node, TypeScript                                            |
-| Database   | PostgreSQL, Prisma                                                     |
-| LLM        | LangChain, OpenAI (e.g. `gpt-4o-mini`)                                 |
-| Validation | Zod                                                                    |
-| Deployment | Render (API + managed Postgres) and Vercel(Client) |
+| Layer      | Technology                                                    |
+| ---------- | ------------------------------------------------------------- |
+| Client     | React 19, Vite, TypeScript, Tailwind CSS, React Router, Axios |
+| API        | Express 5, Node, TypeScript                                   |
+| Database   | PostgreSQL, Prisma                                            |
+| LLM        | LangChain, OpenAI (e.g. `gpt-4o-mini`)                        |
+| Validation | Zod                                                           |
+| Deployment | Render (API + managed Postgres) and Vercel(Client)            |
 
 ---
 
@@ -69,13 +69,9 @@ Only safeguards present in the codebase are listed above.
 
 ---
 
-## Security considerations
+## Security (summary)
 
-- **Input validation** — Server uses Zod schemas: profile text 80–8000 chars, optional names max 80 chars, title max 120 chars. Invalid input returns 400 with `{ error: string }`. Request body size is limited to 256 KB (`express.json({ limit })`).
-- **Rate limiting** — POST `/api/generate` is rate limited (10 req / 10 min per IP). GET prep-packs endpoints are not limited so list/detail views are unaffected. Set `trust proxy` (e.g. `app.set("trust proxy", 1)`) when deployed behind a reverse proxy (e.g. Render) so `req.ip` is correct.
-- **Low-signal heuristic** — Before calling the LLM, the server runs a lightweight `isLowSignalText()` check (e.g. very low word count, high repetition, symbol-heavy input) and returns 400 with a friendly message to reduce garbage/abuse inputs.
-- **Prompt injection** — System prompt treats user-provided profiles as untrusted; the model is instructed to ignore instructions in profiles, not reveal system prompts or secrets, and to output JSON only. Repair-once flow is unchanged.
-- **XSS** — User and model output are never rendered as HTML. PrepPackView, NoteDetailPage (including raw profile text in `<pre>`), and ErrorBanner render plain text only. No `dangerouslySetInnerHTML` or similar is used.
+Input validation, rate limiting, and prompt rules are covered in **LLM Reliability & Safety** above. Additionally: low-signal input is rejected via `isLowSignalText()` before calling the LLM; set `trust proxy` when behind a reverse proxy (e.g. Render) so rate limiting uses the correct IP; all user and model output is rendered as plain text (no `dangerouslySetInnerHTML`).
 
 ---
 
@@ -193,36 +189,9 @@ Copy `env.example` to `.env` in the repo root or `packages/server` and set the s
 
 ---
 
-## Quality gates
+## Quality & Docker
 
-### Local (Husky)
-
-- **pre-commit** — Runs `lint-staged`: Prettier on staged `*.{ts,tsx,js,jsx,json,md,css}`. Commit is blocked if formatting fails.
-- **pre-push** — Runs full gates: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`. Push is blocked if any fail.
-
-After `npm install`, Husky is installed via the `prepare` script. To test hooks: e.g. try committing a file with a lint/format error (pre-commit should block) or run `npm run build` locally to ensure pre-push would pass.
-
-### CI (GitHub Actions)
-
-- Workflow: `.github/workflows/ci.yml`
-- Triggers: **pull_request** and **push** to `main`
-- Jobs: **Server** and **Client** run in parallel. Each: checkout → Node 20 + npm cache → `npm ci` → lint → typecheck → test → build
-- Status: Check the **Actions** tab on GitHub for PR and main runs.
-
-### CD (Render)
-
-- **Render** deploys automatically on merge to `main` when the repo is connected (Blueprint or Git-based deploy). No separate CD workflow is required. If you use Render deploy hooks instead, add a workflow that calls the hook URL from a GitHub Secret (e.g. `RENDER_DEPLOY_HOOK_API`) on successful main builds; do not commit hook URLs.
-
-### Docker (optional)
-
-Run Postgres and the API in containers; run the client on the host for fast HMR. See [docs/DOCKER.md](docs/DOCKER.md) for details.
-
-```bash
-docker compose up -d postgres
-docker compose up --build server
-# In another terminal:
-npm run dev:client
-```
+**CI:** `.github/workflows/ci.yml` runs on PR and push to `main` (lint, typecheck, test, build for server and client). **Local:** Husky pre-commit (Prettier on staged files) and pre-push (full lint, typecheck, test, build). **Docker (optional):** Postgres and API in containers — see [docs/DOCKER.md](docs/DOCKER.md). Quick start: `docker compose up -d postgres` then `docker compose up --build server`; run `npm run dev:client` on the host for HMR.
 
 ---
 
@@ -252,10 +221,7 @@ If you deploy using **Docker** on Render (build from repo root, Dockerfile):
 - Do **not** set a Render pre-deploy command for migrations. The image **entrypoint** (`docker-entrypoint.sh`) runs `prisma migrate deploy` when the container starts.
 - Set the same environment variables on the service: `DATABASE_URL`, `OPENAI_API_KEY`, `ALLOWED_ORIGINS`.
 
-**Placeholders to replace before submission:**
-
-- `<RENDER_API_URL>` — Your Render API service URL (e.g. `https://meeting-prep-copilot-api.onrender.com`).
-- `<RENDER_CLIENT_URL>` — Your deployed client URL (for `ALLOWED_ORIGINS` and for `VITE_API_BASE_URL` when building the client).
+Replace `<RENDER_API_URL>` and `<RENDER_CLIENT_URL>` with your deployed URLs before submission.
 
 ---
 
@@ -266,17 +232,6 @@ If you deploy using **Docker** on Render (build from repo root, Dockerfile):
 - **Repair once** — Balances UX (many LLM mistakes are fixable in one shot) with cost and latency; no unbounded retries.
 - **Minimal UI** — Focus on the assignment scope: generate, save, list, detail. No auth, no user accounts, no multi-tenancy.
 - **Intentionally not built** — Authentication, user accounts, login, or per-user data isolation.
-
----
-
-## Next Improvements
-
-- **Auth & multi-user** — Accounts and per-user prep packs.
-- **Input structuring** — Optional structured fields (e.g. company name, stage) in addition to free-text profiles.
-- **Analytics** — Usage and token metrics.
-- **Caching** — Cache identical or near-identical profile pairs to reduce LLM calls.
-- **Streaming** — Stream LLM output for perceived performance.
-- **RAG** — Use investor/startup docs or past notes to improve relevance.
 
 ---
 

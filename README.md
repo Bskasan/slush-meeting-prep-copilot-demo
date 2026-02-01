@@ -2,6 +2,8 @@
 
 **Meeting Prep Copilot** is a PERN-stack app for the Slush Software Engineer Assignment 2026. Users paste startup and investor profile text; the app generates a structured **meeting prep pack** (JSON) via an LLM, and users can save and browse these as notes (list and detail views).
 
+**Live demo:** [https://slush-meeting-prep-copilot-demo-cli.vercel.app/](https://slush-meeting-prep-copilot-demo-cli.vercel.app/)
+
 ---
 
 ## Features

@@ -176,7 +176,15 @@ Copy `env.example` to `.env` in the repo root or `packages/server` and set the s
    - Client: typically http://localhost:5173 (Vite).
    - Server: http://localhost:3000 (or value of `PORT`).
 
-**Other scripts:** `npm run build` (client + server), `npm run build:client`, `npm run build:server`, `npm run lint` (client). See root `package.json` and `packages/*/package.json` for full list.
+5. **Run tests**
+
+   ```bash
+   npm run test
+   ```
+
+   Runs server tests (`generate` route, `generatePrepPack` service, schemas) and client tests (`GeneratorPage`, `NotesListPage`).
+
+**Other scripts:** `npm run build` (client + server), `npm run build:client`, `npm run build:server`, `npm run lint` (client), `npm run test`. See root `package.json` and `packages/*/package.json` for full list.
 
 ### Docker (optional)
 
@@ -264,6 +272,7 @@ If you deploy using **Docker** on Render (build from repo root, Dockerfile):
 |--------|-------------|
 | `npm run dev` | Run client and server in dev |
 | `npm run build` | Build client and server |
+| `npm run test` | Run server and client tests |
 | `npm run db:migrate` | Run Prisma migrations |
 | `npm run db:seed` | Seed database |
 | `npm run lint` | Lint client |

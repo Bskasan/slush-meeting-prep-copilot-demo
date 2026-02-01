@@ -5,6 +5,7 @@
     "packages/*"
   ],
   "scripts": {
+    "test": "npm run test -w @meeting-prep/server && npm run test -w @meeting-prep/client",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "npm run dev -w @meeting-prep/client",
     "dev:server": "npm run dev -w @meeting-prep/server",

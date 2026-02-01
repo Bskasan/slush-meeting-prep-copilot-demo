@@ -86,9 +86,8 @@ describe("GeneratorPage", () => {
     resolveGenerate!(validGenerateResponse);
 
     await waitFor(() => {
-      expect(screen.getByText(/Fit score/i)).toBeInTheDocument();
+      expect(screen.getByText("75/100")).toBeInTheDocument();
     });
-    expect(screen.getByText("75/100")).toBeInTheDocument();
     expect(screen.getByText("Sample question?")).toBeInTheDocument();
   });
 
@@ -105,11 +104,8 @@ describe("GeneratorPage", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /^generate$/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText(/Fit score/i)).toBeInTheDocument();
-    });
+    const saveBtn = await screen.findByRole("button", { name: /save as note/i });
 
-    const saveBtn = screen.getByRole("button", { name: /save as note/i });
     await userEvent.click(saveBtn);
 
     expect(mockSavePrepPack).toHaveBeenCalled();

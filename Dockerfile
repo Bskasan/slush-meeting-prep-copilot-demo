@@ -12,6 +12,10 @@ COPY packages/server ./packages/server
 # Minimal client package.json so workspace install succeeds
 COPY packages/client/package.json ./packages/client/package.json
 
+# prisma generate runs in server postinstall; prisma.config.ts requires DATABASE_URL.
+# Use a placeholder at build time (not used for connections); runtime uses real URL from Render.
+ENV DATABASE_URL=postgresql://build:build@localhost:5432/build
+
 RUN npm ci
 
 # Production stage

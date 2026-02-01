@@ -32,9 +32,6 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
   next();
 });
 
-app.get("/healthz", (_req, res) => {
-  res.status(200).json({ ok: true });
-});
 app.use("/health", healthRouter);
 app.use("/api/health", healthRouter);
 

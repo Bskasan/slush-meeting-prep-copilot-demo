@@ -29,7 +29,7 @@
 | Database   | PostgreSQL, Prisma                                                     |
 | LLM        | LangChain, OpenAI (e.g. `gpt-4o-mini`)                                 |
 | Validation | Zod                                                                    |
-| Deployment | Render (API + managed Postgres); client can be Vercel or Render static |
+| Deployment | Render (API + managed Postgres) and Vercel(Client) |
 
 ---
 
@@ -292,18 +292,6 @@ If you deploy using **Docker** on Render (build from repo root, Dockerfile):
 ├── package.json    # Workspace root scripts
 └── README.md
 ```
-
----
-
-## Submission checklist (Slush 2026)
-
-Before submitting, ensure:
-
-- [ ] **Repo link** — Replace placeholder or add repo URL where required
-- [ ] **Deployed app link or screen recording** — Replace `<DEPLOYED_APP_URL>` or provide a recording
-- [ ] **Email** — Send to **aapo.leppanen@slush.org** with repo link and deployed link (or recording)
-
-See [docs/REQUIREMENTS_CHECK.md](docs/REQUIREMENTS_CHECK.md) for the full requirements audit.
 
 ---
 

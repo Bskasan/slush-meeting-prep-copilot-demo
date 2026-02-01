@@ -4,7 +4,7 @@ export const inputBase =
 
 export const inputCompact = `${inputBase} py-2`;
 
-export const textareaClass = `${inputBase} min-h-[120px] resize-y`;
+export const textareaClass = `${inputBase} min-h-[300px] resize-y`;
 
 export const btnPrimary =
   "px-4 py-2 rounded-xl font-medium text-white bg-cyan-500 hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-cyan-500";

@@ -1,8 +1,13 @@
 # Meeting Prep Copilot
 
-**Meeting Prep Copilot** is a PERN-stack app for the Slush Software Engineer Assignment 2026. Users paste startup and investor profile text; the app generates a structured **meeting prep pack** (JSON) via an LLM, and users can save and browse these as notes (list and detail views).
+**Meeting Prep Copilot** is a PERN-stack app for the Slush Software Engineer Assignment 2026 (Option 1: LLM-Based Application). Users paste startup and investor profile text; the app generates a structured **meeting prep pack** (JSON) via an LLM, and users can save and browse these as notes (list and detail views).
 
-**Live demo:** [https://slush-meeting-prep-copilot-demo-cli.vercel.app/](https://slush-meeting-prep-copilot-demo-cli.vercel.app/)
+---
+
+## Demo links (placeholders — replace before submission)
+
+- **Deployed app:** [https://slush-meeting-prep-copilot-demo-cli.vercel.app/](https://
+  slush-meeting-prep-copilot-demo-cli.vercel.app/)
 
 ---
 
@@ -77,13 +82,15 @@ Only safeguards present in the codebase are listed above.
 
 ## API Endpoints (Brief)
 
-| Method | Path                       | Description                                                                                                                        |
-| ------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `POST` | `/api/generate`            | Generate a prep pack from profile text. Body: `startupProfileText`, `investorProfileText`, optional `startupName`, `investorName`. |
-| `POST` | `/api/prep-packs`          | Save a prep pack. Body: `title`, profile text, `resultJson` (valid prep pack object), optional names/model/tokensUsed.             |
-| `GET`  | `/api/prep-packs`          | List saved packs (id, createdAt, title, startupName, investorName, fitScore).                                                      |
-| `GET`  | `/api/prep-packs/:id`      | Get one prep pack by id (full record including `resultJson`).                                                                      |
-| `GET`  | `/health` or `/api/health` | Health check. Returns `{ "status": "ok" }`.                                                                                        |
+| Method   | Path                       | Description                                                                                                                        |
+| -------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `POST`   | `/api/generate`            | Generate a prep pack from profile text. Body: `startupProfileText`, `investorProfileText`, optional `startupName`, `investorName`. |
+| `POST`   | `/api/prep-packs`          | Save a prep pack. Body: `title`, profile text, `resultJson` (valid prep pack object), optional names/model/tokensUsed.             |
+| `GET`    | `/api/prep-packs`          | List saved packs (id, createdAt, title, startupName, investorName, fitScore).                                                      |
+| `GET`    | `/api/prep-packs/:id`      | Get one prep pack by id (full record including `resultJson`).                                                                      |
+| `PATCH`  | `/api/prep-packs/:id`      | Partial update of a prep pack (optional).                                                                                          |
+| `DELETE` | `/api/prep-packs/:id`      | Delete a prep pack (optional).                                                                                                     |
+| `GET`    | `/health` or `/api/health` | Health check. Returns `{ "status": "ok" }`.                                                                                        |
 
 **Example — POST /api/generate (minimal request):**
 
@@ -286,6 +293,20 @@ If you deploy using **Docker** on Render (build from repo root, Dockerfile):
 ├── package.json    # Workspace root scripts
 └── README.md
 ```
+
+---
+
+## Submission checklist (Slush 2026)
+
+Before submitting, ensure:
+
+- [ ] **Repo link** — Replace placeholder or add repo URL where required
+- [ ] **Deployed app link or screen recording** — Replace `<DEPLOYED_APP_URL>` or provide a recording
+- [ ] **Email** — Send to **aapo.leppanen@slush.org** with repo link and deployed link (or recording)
+
+See [docs/REQUIREMENTS_CHECK.md](docs/REQUIREMENTS_CHECK.md) for the full requirements audit.
+
+---
 
 ## Scripts (root)
 

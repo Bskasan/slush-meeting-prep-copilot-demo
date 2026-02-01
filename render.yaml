@@ -1,0 +1,41 @@
+# Render Blueprint: API + PostgreSQL for meeting-prep-copilot
+# Deploys only the server (packages/server). Client is deployed elsewhere (e.g. Vite/Vercel).
+
+services:
+  - type: web
+    name: meeting-prep-copilot-api
+    runtime: node
+    plan: free
+
+    # Monorepo: build and run from the server package
+    rootDir: packages/server
+
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: meeting-prep-copilot-db
+          property: connectionString
+      # Set in Render dashboard or add here (required for POST /api/generate):
+      # - key: OPENAI_API_KEY
+      #   sync: false
+      # Production client origin for CORS (e.g. your Vite/Vercel URL):
+      # - key: ALLOWED_ORIGINS
+      #   sync: false
+
+    buildCommand: npm ci
+    startCommand: npm run start
+    preDeployCommand: npx prisma migrate deploy
+
+    region: oregon
+
+databases:
+  - name: meeting-prep-copilot-db
+    databaseName: meeting_prep
+    user: meeting_prep
+    plan: free
+    region: oregon
+    postgresMajorVersion: "16"
+    # Optional: restrict to Render IPs in production
+    # ipAllowList: []
+
+version: "1"

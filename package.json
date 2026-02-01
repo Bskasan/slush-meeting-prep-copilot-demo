@@ -19,7 +19,7 @@
     "lint-staged": "lint-staged",
     "db:migrate": "npm run db:migrate -w @meeting-prep/server",
     "db:seed": "npm run db:seed -w @meeting-prep/server",
-    "prepare": "node -e \"if (process.env.CI !== 'true') { require('child_process').execSync('husky', {stdio: 'inherit'}) }\""
+    "prepare": "node -e \"if (process.env.CI !== 'true' && process.env.VERCEL !== '1') { require('child_process').execSync('husky', {stdio: 'inherit'}) }\""
   },
   "devDependencies": {
     "concurrently": "^9.1.0",

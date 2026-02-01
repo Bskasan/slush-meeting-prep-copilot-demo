@@ -7,6 +7,10 @@ on:
   push:
     branches: [main]
 
+env:
+  # Required by server postinstall (prisma generate); not used to connect in CI
+  DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+
 jobs:
   server:
     name: Server

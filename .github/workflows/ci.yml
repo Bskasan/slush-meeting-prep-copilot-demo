@@ -1,0 +1,63 @@
+# CI: lint, typecheck, test, build on PRs and push to main
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  server:
+    name: Server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint -w @meeting-prep/server
+
+      - name: Typecheck
+        run: npm run typecheck -w @meeting-prep/server
+
+      - name: Test
+        run: npm run test -w @meeting-prep/server
+
+      - name: Build
+        run: npm run build -w @meeting-prep/server
+
+  client:
+    name: Client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint -w @meeting-prep/client
+
+      - name: Typecheck
+        run: npm run typecheck -w @meeting-prep/client
+
+      - name: Test
+        run: npm run test -w @meeting-prep/client
+
+      - name: Build
+        run: npm run build -w @meeting-prep/client

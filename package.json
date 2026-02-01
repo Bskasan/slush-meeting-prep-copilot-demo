@@ -12,13 +12,26 @@
     "build": "npm run build -w @meeting-prep/server && npm run build -w @meeting-prep/client",
     "build:client": "npm run build -w @meeting-prep/client",
     "build:server": "npm run build -w @meeting-prep/server",
-    "lint": "npm run lint -w @meeting-prep/client",
+    "lint": "npm run lint -w @meeting-prep/server && npm run lint -w @meeting-prep/client",
+    "typecheck": "npm run typecheck -w @meeting-prep/server && npm run typecheck -w @meeting-prep/client",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint-staged": "lint-staged",
     "db:migrate": "npm run db:migrate -w @meeting-prep/server",
-    "db:seed": "npm run db:seed -w @meeting-prep/server"
+    "db:seed": "npm run db:seed -w @meeting-prep/server",
+    "prepare": "husky"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.4.2",
     "typescript": "^5.9.3"
   },
-  "packageManager": "npm@10.0.0"
+  "packageManager": "npm@10.0.0",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,css}": [
+      "prettier --write"
+    ]
+  }
 }

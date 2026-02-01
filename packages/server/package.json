@@ -10,7 +10,10 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "test": "jest --forceExit",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit"
   },
   "prisma": {
     "seed": "tsx prisma/seedData/seed.ts"

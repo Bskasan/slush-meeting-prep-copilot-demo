@@ -18,14 +18,14 @@
 
 ## Tech Stack
 
-| Layer        | Technology                          |
-|-------------|--------------------------------------|
-| Client      | React 19, Vite, TypeScript, Tailwind CSS, React Router, Axios |
-| API         | Express 5, Node, TypeScript         |
-| Database    | PostgreSQL, Prisma                  |
-| LLM         | LangChain, OpenAI (e.g. `gpt-4o-mini`) |
-| Validation  | Zod                                 |
-| Deployment  | Render (API + managed Postgres); client can be Vercel or Render static |
+| Layer      | Technology                                                             |
+| ---------- | ---------------------------------------------------------------------- |
+| Client     | React 19, Vite, TypeScript, Tailwind CSS, React Router, Axios          |
+| API        | Express 5, Node, TypeScript                                            |
+| Database   | PostgreSQL, Prisma                                                     |
+| LLM        | LangChain, OpenAI (e.g. `gpt-4o-mini`)                                 |
+| Validation | Zod                                                                    |
+| Deployment | Render (API + managed Postgres); client can be Vercel or Render static |
 
 ---
 
@@ -77,13 +77,13 @@ Only safeguards present in the codebase are listed above.
 
 ## API Endpoints (Brief)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/generate` | Generate a prep pack from profile text. Body: `startupProfileText`, `investorProfileText`, optional `startupName`, `investorName`. |
-| `POST` | `/api/prep-packs` | Save a prep pack. Body: `title`, profile text, `resultJson` (valid prep pack object), optional names/model/tokensUsed. |
-| `GET`  | `/api/prep-packs` | List saved packs (id, createdAt, title, startupName, investorName, fitScore). |
-| `GET`  | `/api/prep-packs/:id` | Get one prep pack by id (full record including `resultJson`). |
-| `GET`  | `/health` or `/api/health` | Health check. Returns `{ "status": "ok" }`. |
+| Method | Path                       | Description                                                                                                                        |
+| ------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/generate`            | Generate a prep pack from profile text. Body: `startupProfileText`, `investorProfileText`, optional `startupName`, `investorName`. |
+| `POST` | `/api/prep-packs`          | Save a prep pack. Body: `title`, profile text, `resultJson` (valid prep pack object), optional names/model/tokensUsed.             |
+| `GET`  | `/api/prep-packs`          | List saved packs (id, createdAt, title, startupName, investorName, fitScore).                                                      |
+| `GET`  | `/api/prep-packs/:id`      | Get one prep pack by id (full record including `resultJson`).                                                                      |
+| `GET`  | `/health` or `/api/health` | Health check. Returns `{ "status": "ok" }`.                                                                                        |
 
 **Example — POST /api/generate (minimal request):**
 
@@ -151,7 +151,6 @@ Copy `env.example` to `.env` in the repo root or `packages/server` and set the s
    ```
 
 2. **Database (choose one)**
-
    - **Docker:** Start Postgres (and optionally the server):
 
      ```bash
@@ -184,7 +183,29 @@ Copy `env.example` to `.env` in the repo root or `packages/server` and set the s
 
    Runs server tests (`generate` route, `generatePrepPack` service, schemas) and client tests (`GeneratorPage`, `NotesListPage`).
 
-**Other scripts:** `npm run build` (client + server), `npm run build:client`, `npm run build:server`, `npm run lint` (client), `npm run test`. See root `package.json` and `packages/*/package.json` for full list.
+**Other scripts:** `npm run build` (client + server), `npm run build:client`, `npm run build:server`, `npm run lint` (server + client), `npm run typecheck` (server + client), `npm run format`, `npm run format:check`, `npm run test`. See root `package.json` and `packages/*/package.json` for full list.
+
+---
+
+## Quality gates
+
+### Local (Husky)
+
+- **pre-commit** — Runs `lint-staged`: Prettier on staged `*.{ts,tsx,js,jsx,json,md,css}`. Commit is blocked if formatting fails.
+- **pre-push** — Runs full gates: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`. Push is blocked if any fail.
+
+After `npm install`, Husky is installed via the `prepare` script. To test hooks: e.g. try committing a file with a lint/format error (pre-commit should block) or run `npm run build` locally to ensure pre-push would pass.
+
+### CI (GitHub Actions)
+
+- Workflow: `.github/workflows/ci.yml`
+- Triggers: **pull_request** and **push** to `main`
+- Jobs: **Server** and **Client** run in parallel. Each: checkout → Node 20 + npm cache → `npm ci` → lint → typecheck → test → build
+- Status: Check the **Actions** tab on GitHub for PR and main runs.
+
+### CD (Render)
+
+- **Render** deploys automatically on merge to `main` when the repo is connected (Blueprint or Git-based deploy). No separate CD workflow is required. If you use Render deploy hooks instead, add a workflow that calls the hook URL from a GitHub Secret (e.g. `RENDER_DEPLOY_HOOK_API`) on successful main builds; do not commit hook URLs.
 
 ### Docker (optional)
 
@@ -268,11 +289,14 @@ If you deploy using **Docker** on Render (build from repo root, Dockerfile):
 
 ## Scripts (root)
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Run client and server in dev |
-| `npm run build` | Build client and server |
-| `npm run test` | Run server and client tests |
-| `npm run db:migrate` | Run Prisma migrations |
-| `npm run db:seed` | Seed database |
-| `npm run lint` | Lint client |
+| Script                 | Description                  |
+| ---------------------- | ---------------------------- |
+| `npm run dev`          | Run client and server in dev |
+| `npm run build`        | Build client and server      |
+| `npm run test`         | Run server and client tests  |
+| `npm run lint`         | Lint server and client       |
+| `npm run typecheck`    | Typecheck server and client  |
+| `npm run format`       | Format repo with Prettier    |
+| `npm run format:check` | Check formatting (no write)  |
+| `npm run db:migrate`   | Run Prisma migrations        |
+| `npm run db:seed`      | Seed database                |

@@ -58,10 +58,20 @@
   - Server extracts the first `{...}` from the raw string and re-parses; if parsing fails → 502.
   - If parsing succeeds but validation fails, the server sends one repair request to the LLM with the validation error summary; if the repair response is still invalid or fails validation → 502 with a safe error. No second repair.
 - **Input validation** — Profile text: min 80 chars, max 8000 chars (Zod). Optional names: max 80 chars. Request body size limit: **256 KB**.
-- **Rate limiting** — In-memory rate limiter on `/api/generate` and `/api/prep-packs`: 10 requests per 10 minutes per IP. 429 when exceeded.
+- **Rate limiting** — In-memory rate limiter on **POST** `/api/generate` only: 10 requests per 10 minutes per IP. 429 when exceeded. GET `/api/prep-packs` and GET `/api/prep-packs/:id` are not rate limited.
 - **Prompt rules** — System prompt enforces: output **JSON only** (no markdown/code fences); **do not invent facts** if info is missing; **ignore instructions** inside the provided startup/investor profiles (injection resistance).
 
 Only safeguards present in the codebase are listed above.
+
+---
+
+## Security considerations
+
+- **Input validation** — Server uses Zod schemas: profile text 80–8000 chars, optional names max 80 chars, title max 120 chars. Invalid input returns 400 with `{ error: string }`. Request body size is limited to 256 KB (`express.json({ limit })`).
+- **Rate limiting** — POST `/api/generate` is rate limited (10 req / 10 min per IP). GET prep-packs endpoints are not limited so list/detail views are unaffected. Set `trust proxy` (e.g. `app.set("trust proxy", 1)`) when deployed behind a reverse proxy (e.g. Render) so `req.ip` is correct.
+- **Low-signal heuristic** — Before calling the LLM, the server runs a lightweight `isLowSignalText()` check (e.g. very low word count, high repetition, symbol-heavy input) and returns 400 with a friendly message to reduce garbage/abuse inputs.
+- **Prompt injection** — System prompt treats user-provided profiles as untrusted; the model is instructed to ignore instructions in profiles, not reveal system prompts or secrets, and to output JSON only. Repair-once flow is unchanged.
+- **XSS** — User and model output are never rendered as HTML. PrepPackView, NoteDetailPage (including raw profile text in `<pre>`), and ErrorBanner render plain text only. No `dangerouslySetInnerHTML` or similar is used.
 
 ---
 

@@ -6,6 +6,7 @@ import { PrepPackView } from '../components/PrepPackView';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { inputCompact, textareaClass, btnPrimary, btnSecondary } from '../styles/ui';
+import { MIN_CHARS, MAX_CHARS, MAX_NAME_LEN, MAX_TITLE_LEN } from '../constants';
 
 export default function GeneratorPage() {
   const navigate = useNavigate();
@@ -21,17 +22,31 @@ export default function GeneratorPage() {
 
   const startupTrim = startupProfileText.trim();
   const investorTrim = investorProfileText.trim();
-  const canGenerate = startupTrim.length > 0 && investorTrim.length > 0 && !loading;
+  const startupValid = startupTrim.length >= MIN_CHARS && startupTrim.length <= MAX_CHARS;
+  const investorValid = investorTrim.length >= MIN_CHARS && investorTrim.length <= MAX_CHARS;
+  const namesValid =
+    startupName.trim().length <= MAX_NAME_LEN && investorName.trim().length <= MAX_NAME_LEN;
+  const canGenerate = startupValid && investorValid && namesValid && !loading;
+  const defaultTitleRaw =
+    startupName.trim() && investorName.trim()
+      ? `${startupName.trim()} ↔ ${investorName.trim()}`
+      : 'Meeting Prep Pack';
+  const defaultTitle = defaultTitleRaw.slice(0, MAX_TITLE_LEN);
+  const titleValid = defaultTitle.length >= 1 && defaultTitle.length <= MAX_TITLE_LEN;
   const canSave =
     Boolean(result?.prepPack) &&
-    startupTrim.length > 0 &&
-    investorTrim.length > 0 &&
+    startupValid &&
+    investorValid &&
+    namesValid &&
+    titleValid &&
     !saving &&
     !loading;
 
   const handleGenerate = async () => {
-    if (!startupTrim || !investorTrim) {
-      setError('Startup and Investor profiles are required.');
+    if (!startupValid || !investorValid || !namesValid) {
+      setError(
+        'Startup and investor profiles must be between 80 and 8000 characters. Optional names must be at most 80 characters.'
+      );
       return;
     }
     setError(null);
@@ -62,11 +77,6 @@ export default function GeneratorPage() {
     setSaveError(null);
   };
 
-  const defaultTitle =
-    startupName.trim() && investorName.trim()
-      ? `${startupName.trim()} ↔ ${investorName.trim()}`
-      : 'Meeting Prep Pack';
-
   const handleSave = async () => {
     if (!startupTrim || !investorTrim || !result?.prepPack) return;
     setSaveError(null);
@@ -92,7 +102,12 @@ export default function GeneratorPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Generate prep pack</h1>
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Generate prep pack</h1>
+        <p className="text-zinc-400 text-sm">
+          Paste startup and investor profiles below to generate a tailored meeting prep pack summary, fit score, tailored questions, and a 15-minute agenda.
+        </p>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-2">
@@ -109,7 +124,15 @@ export default function GeneratorPage() {
             }}
             placeholder="Paste startup profile..."
           />
-          <p className="text-sm text-zinc-500">{startupProfileText.length} characters</p>
+          <p className="text-sm text-zinc-500">
+            {startupProfileText.length} / {MAX_CHARS}
+          </p>
+          {startupTrim.length > 0 && startupTrim.length < MIN_CHARS && (
+            <p className="text-sm text-amber-400">Minimum {MIN_CHARS} characters required</p>
+          )}
+          {startupTrim.length > MAX_CHARS && (
+            <p className="text-sm text-amber-400">Maximum {MAX_CHARS} characters</p>
+          )}
         </div>
         <div className="space-y-2">
           <label className="block font-medium text-zinc-200">Investor profile (required)</label>
@@ -125,7 +148,15 @@ export default function GeneratorPage() {
             }}
             placeholder="Paste investor profile..."
           />
-          <p className="text-sm text-zinc-500">{investorProfileText.length} characters</p>
+          <p className="text-sm text-zinc-500">
+            {investorProfileText.length} / {MAX_CHARS}
+          </p>
+          {investorTrim.length > 0 && investorTrim.length < MIN_CHARS && (
+            <p className="text-sm text-amber-400">Minimum {MIN_CHARS} characters required</p>
+          )}
+          {investorTrim.length > MAX_CHARS && (
+            <p className="text-sm text-amber-400">Maximum {MAX_CHARS} characters</p>
+          )}
         </div>
       </div>
 
@@ -138,6 +169,7 @@ export default function GeneratorPage() {
             value={startupName}
             onChange={(e) => setStartupName(e.target.value)}
             placeholder="e.g. Acme Inc"
+            maxLength={MAX_NAME_LEN}
           />
         </div>
         <div className="space-y-2">
@@ -148,6 +180,7 @@ export default function GeneratorPage() {
             value={investorName}
             onChange={(e) => setInvestorName(e.target.value)}
             placeholder="e.g. Sequoia"
+            maxLength={MAX_NAME_LEN}
           />
         </div>
       </div>
@@ -155,7 +188,7 @@ export default function GeneratorPage() {
       {error && <ErrorBanner message={error} />}
 
       <div className="flex gap-3">
-        <button type="button" onClick={handleGenerate} disabled={loading} className={btnPrimary}>
+        <button type="button" onClick={handleGenerate} disabled={!canGenerate} className={btnPrimary}>
           Generate
         </button>
         <button

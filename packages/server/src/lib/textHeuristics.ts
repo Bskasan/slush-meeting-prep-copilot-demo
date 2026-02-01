@@ -9,7 +9,7 @@ export function isLowSignalText(text: string): boolean {
   if (t.length < MIN_CHARS) return true;
 
   const words = t.split(/\s+/).filter(Boolean);
-  if (words.length < 5) return true;
+  if (words.length < 10) return true;
 
   const uniqueChars = new Set(t).size;
   if (t.length > 200 && uniqueChars / t.length < 0.05) return true;

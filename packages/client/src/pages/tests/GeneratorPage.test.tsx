@@ -14,6 +14,10 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
 }));
 
+/** Minimum profile length (80) for Generate to be enabled. */
+const MIN_PROFILE_CHARS = 80;
+const validProfileText = "A".repeat(MIN_PROFILE_CHARS);
+
 const validPrepPack: PrepPackResult = {
   startupSummary: [],
   fitScore: 75,
@@ -47,16 +51,15 @@ describe("GeneratorPage", () => {
     jest.clearAllMocks();
   });
 
-  it("shows validation error and does not call generate when Generate clicked with empty required fields", async () => {
+  it("disables Generate when profiles are empty and does not call API", async () => {
     renderGeneratorPage();
 
     const generateBtn = screen.getByRole("button", { name: /generate/i });
+    expect(generateBtn).toBeDisabled();
     await userEvent.click(generateBtn);
 
     expect(mockGeneratePrepPack).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Startup and Investor profiles are required."
-    );
+    expect(screen.getAllByText(/0 \/ 8000/).length).toBeGreaterThanOrEqual(1);
   });
 
   it("shows loading state then displays result after Generate with filled fields", async () => {
@@ -72,8 +75,8 @@ describe("GeneratorPage", () => {
 
     const startupTextarea = screen.getByPlaceholderText(/paste startup profile/i);
     const investorTextarea = screen.getByPlaceholderText(/paste investor profile/i);
-    await userEvent.type(startupTextarea, "Startup profile text");
-    await userEvent.type(investorTextarea, "Investor profile text");
+    await userEvent.type(startupTextarea, validProfileText);
+    await userEvent.type(investorTextarea, validProfileText);
 
     const generateBtn = screen.getByRole("button", { name: /^generate$/i });
     await userEvent.click(generateBtn);
@@ -97,8 +100,8 @@ describe("GeneratorPage", () => {
 
     const startupTextarea = screen.getByPlaceholderText(/paste startup profile/i);
     const investorTextarea = screen.getByPlaceholderText(/paste investor profile/i);
-    await userEvent.type(startupTextarea, "Startup profile text");
-    await userEvent.type(investorTextarea, "Investor profile text");
+    await userEvent.type(startupTextarea, validProfileText);
+    await userEvent.type(investorTextarea, validProfileText);
 
     await userEvent.click(screen.getByRole("button", { name: /^generate$/i }));
 

@@ -12,6 +12,9 @@ const JSON_BODY_LIMIT = "256kb";
 
 const app = express();
 
+// Trust first proxy (e.g. Render) so req.ip is correct for rate limiting
+app.set("trust proxy", 1);
+
 // CORS: set headers first so they're always present when the request reaches our app (avoids issues with 503/cold start from proxy)
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -61,7 +64,7 @@ app.use("/api/health", healthRouter);
 
 const rateLimiter = createRateLimiter({ windowMs: 10 * 60 * 1000, maxRequests: 10 });
 app.use("/api/generate", rateLimiter, generateRouter);
-app.use("/api/prep-packs", rateLimiter, prepPackRouter);
+app.use("/api/prep-packs", prepPackRouter);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err instanceof ZodError) {

@@ -191,7 +191,7 @@ Copy `env.example` to `.env` in the repo root or `packages/server` and set the s
 
 ## Quality & Docker
 
-**CI:** `.github/workflows/ci.yml` runs on PR and push to `main` (lint, typecheck, test, build for server and client). **Local:** Husky pre-commit (Prettier on staged files) and pre-push (full lint, typecheck, test, build). **Docker (optional):** Postgres and API in containers — see [docs/DOCKER.md](docs/DOCKER.md). Quick start: `docker compose up -d postgres` then `docker compose up --build server`; run `npm run dev:client` on the host for HMR.
+**CI:** `.github/workflows/ci.yml` runs on PR and push to `main` (lint, typecheck, test, build for server and client). **Local:** Husky pre-commit (Prettier on staged files) and pre-push (full lint, typecheck, test, build). **Docker (optional):** Postgres and API in containers. Quick start: `docker compose up -d postgres` then `docker compose up --build server`; run `npm run dev:client` on the host for HMR.
 
 ---
 

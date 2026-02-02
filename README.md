@@ -197,31 +197,7 @@ Copy `env.example` to `.env` in the repo root or `packages/server` and set the s
 
 ## Deployment (Render)
 
-Deployment is on **Render**. Two approaches are supported:
-
-### Option A — Node runtime (Blueprint)
-
-The repo includes a **Render Blueprint** (`render.yaml`) that defines:
-
-- **Web service** — Node app from `packages/server` (build: `npm ci`, start: `npm run start`). **Migrations:** `preDeployCommand: npx prisma migrate deploy` runs on Render before each deploy.
-- **PostgreSQL** — Managed database `meeting-prep-copilot-db`; `DATABASE_URL` is injected from the database resource.
-
-**API service env vars (set in Render dashboard):**
-
-- `DATABASE_URL` — From Render Postgres (auto if linked).
-- `OPENAI_API_KEY` — Required for generation.
-- `ALLOWED_ORIGINS` — Comma-separated origins for the deployed client (e.g. `<RENDER_CLIENT_URL>` or `https://your-app.vercel.app`). Wildcards supported (e.g. `https://*.vercel.app`).
-
-**Client build:** Set `VITE_API_BASE_URL` to your Render API URL when building the client (e.g. `https://meeting-prep-copilot-api.onrender.com` or `<RENDER_API_URL>`). No trailing slash. If the client is on Vercel, set this in Vercel; set `ALLOWED_ORIGINS` on Render to include the Vercel URL.
-
-### Option B — Docker on Render
-
-If you deploy using **Docker** on Render (build from repo root, Dockerfile):
-
-- Do **not** set a Render pre-deploy command for migrations. The image **entrypoint** (`docker-entrypoint.sh`) runs `prisma migrate deploy` when the container starts.
-- Set the same environment variables on the service: `DATABASE_URL`, `OPENAI_API_KEY`, `ALLOWED_ORIGINS`.
-
-Replace `<RENDER_API_URL>` and `<RENDER_CLIENT_URL>` with your deployed URLs before submission.
+Deployment is on **Render**. **Render** is handling our *PostgreSQL Database* and *Server*
 
 ---
 

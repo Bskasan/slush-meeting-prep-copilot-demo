@@ -24,7 +24,7 @@
 
 | Layer      | Technology                                                    |
 | ---------- | ------------------------------------------------------------- |
-| Client     | React 19, Vite, TypeScript, Tailwind CSS, React Router, Axios |
+| Client     | React 19, Vite, TypeScript, Tailwind CSS, React Router        |
 | API        | Express 5, Node, TypeScript                                   |
 | Database   | PostgreSQL, Prisma                                            |
 | LLM        | LangChain, OpenAI (e.g. `gpt-4o-mini`)                        |

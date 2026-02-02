@@ -1,7 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: dark;
@@ -25,5 +28,7 @@ textarea:focus-visible,
 button:focus-visible,
 a:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgb(9 9 11), 0 0 0 4px rgb(34 211 238 / 0.5);
+  box-shadow:
+    0 0 0 2px rgb(9 9 11),
+    0 0 0 4px rgb(34 211 238 / 0.5);
 }

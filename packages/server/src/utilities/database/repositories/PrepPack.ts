@@ -3,7 +3,6 @@ import { prisma } from "../../../lib/prisma";
 import { toRepoError } from "../helpers";
 import type DatabaseResponse from "../response";
 
-
 class PrepPackRepository {
   async createPrepPack(
     data: Prisma.PrepPackCreateInput,

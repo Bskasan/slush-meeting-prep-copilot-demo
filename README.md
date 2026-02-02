@@ -22,14 +22,14 @@
 
 ## Tech Stack
 
-| Layer      | Technology                                                    |
-| ---------- | ------------------------------------------------------------- |
-| Client     | React 19, Vite, TypeScript, Tailwind CSS, React Router        |
-| API        | Express 5, Node, TypeScript                                   |
-| Database   | PostgreSQL, Prisma                                            |
-| LLM        | LangChain, OpenAI (e.g. `gpt-4o-mini`)                        |
-| Validation | Zod                                                           |
-| Deployment | Render (API + managed Postgres) and Vercel(Client)            |
+| Layer      | Technology                                             |
+| ---------- | ------------------------------------------------------ |
+| Client     | React 19, Vite, TypeScript, Tailwind CSS, React Router |
+| API        | Express 5, Node, TypeScript                            |
+| Database   | PostgreSQL, Prisma                                     |
+| LLM        | LangChain, OpenAI (e.g. `gpt-4o-mini`)                 |
+| Validation | Zod                                                    |
+| Deployment | Render (API + managed Postgres) and Vercel(Client)     |
 
 ---
 
@@ -197,7 +197,7 @@ Copy `env.example` to `.env` in the repo root or `packages/server` and set the s
 
 ## Deployment (Render)
 
-Deployment is on **Render**. **Render** is handling our *PostgreSQL Database* and *Server*
+Deployment is on **Render**. **Render** is handling our _PostgreSQL Database_ and _Server_
 
 ---
 

@@ -1,8 +1,8 @@
-import { Outlet, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import GeneratorPage from './pages/GeneratorPage';
-import NotesListPage from './pages/NotesListPage';
-import NoteDetailPage from './pages/NoteDetailPage';
+import { Outlet, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import GeneratorPage from "./pages/GeneratorPage";
+import NotesListPage from "./pages/NotesListPage";
+import NoteDetailPage from "./pages/NoteDetailPage";
 
 function Layout() {
   return (

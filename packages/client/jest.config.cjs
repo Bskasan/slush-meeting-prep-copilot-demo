@@ -11,13 +11,12 @@ module.exports = {
     "^../lib/api$": "<rootDir>/src/utilities/test/testMocks/api.ts",
     "^../../lib/api$": "<rootDir>/src/utilities/test/testMocks/api.ts",
     "^./lib/api$": "<rootDir>/src/utilities/test/testMocks/api.ts",
-    "^../utilities/constants$": "<rootDir>/src/utilities/test/testMocks/constants.ts",
-    "^../../utilities/constants$": "<rootDir>/src/utilities/test/testMocks/constants.ts",
+    "^../utilities/constants$":
+      "<rootDir>/src/utilities/test/testMocks/constants.ts",
+    "^../../utilities/constants$":
+      "<rootDir>/src/utilities/test/testMocks/constants.ts",
   },
   transform: {
-    "^.+\\.tsx?$": [
-      "ts-jest",
-      { tsconfig: "<rootDir>/tsconfig.jest.json" },
-    ],
+    "^.+\\.tsx?$": ["ts-jest", { tsconfig: "<rootDir>/tsconfig.jest.json" }],
   },
 };

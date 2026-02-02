@@ -7,7 +7,9 @@ export const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? "";
 export const LLM_MODEL = process.env.LLM_MODEL ?? "gpt-4o-mini";
 
 /** Comma-separated allowed CORS origins. Supports wildcards, e.g. https://*.vercel.app */
-export const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? "http://localhost:5173")
+export const ALLOWED_ORIGINS = (
+  process.env.ALLOWED_ORIGINS ?? "http://localhost:5173"
+)
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
@@ -20,7 +22,10 @@ export function isOriginAllowed(origin: string | undefined): boolean {
     const allowedNorm = allowed.replace(/\/$/, "");
     if (allowedNorm === normalized) return true;
     if (allowed.includes("*")) {
-      const escaped: string = allowedNorm.replace(/[.*+?^${}()|[\]\\]/g, (c: string) => (c === "*" ? ".*" : "\\" + c));
+      const escaped: string = allowedNorm.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        (c: string) => (c === "*" ? ".*" : "\\" + c),
+      );
       if (new RegExp("^" + escaped + "$").test(normalized)) return true;
     }
   }

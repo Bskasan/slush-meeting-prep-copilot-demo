@@ -44,7 +44,8 @@ describe("prepPackResultSchema", () => {
   });
 
   it("rejects missing agenda key (e.g. min12_15)", () => {
-    const { min12_15: _, ...agendaWithoutMin12_15 } = validPrepPackResult.agenda;
+    const { min12_15: _, ...agendaWithoutMin12_15 } =
+      validPrepPackResult.agenda;
     const result = prepPackResultSchema.safeParse({
       ...validPrepPackResult,
       agenda: agendaWithoutMin12_15,

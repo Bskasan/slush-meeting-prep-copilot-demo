@@ -16,8 +16,7 @@ export function toRepoError(error: unknown): {
       case "P2025":
         return {
           code: "NOT_FOUND",
-          message:
-            "This prep pack was not found or has already been deleted.",
+          message: "This prep pack was not found or has already been deleted.",
         };
       case "P2002":
         return {

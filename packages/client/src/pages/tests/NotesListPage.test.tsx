@@ -3,7 +3,9 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import NotesListPage from "../NotesListPage";
 import { fetchPrepPacks } from "../../lib/api";
 
-const mockFetchPrepPacks = fetchPrepPacks as jest.MockedFunction<typeof fetchPrepPacks>;
+const mockFetchPrepPacks = fetchPrepPacks as jest.MockedFunction<
+  typeof fetchPrepPacks
+>;
 
 function renderNotesListPage() {
   return render(
@@ -11,7 +13,7 @@ function renderNotesListPage() {
       <Routes>
         <Route path="/notes" element={<NotesListPage />} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 
@@ -30,7 +32,9 @@ describe("NotesListPage", () => {
     });
 
     expect(
-      screen.getByText(/No saved prep packs yet. Generate one from the Generate page./i)
+      screen.getByText(
+        /No saved prep packs yet. Generate one from the Generate page./i,
+      ),
     ).toBeInTheDocument();
   });
 

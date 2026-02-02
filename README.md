@@ -6,7 +6,7 @@
 
 ## Demo
 
-- **Deployed app:** [https://slush-meeting-prep-copilot-demo-cli.vercel.app/](https://slush-meeting-prep-copilot-demo-cli.vercel.app/) — replace with your final URL (or provide a screen recording) when submitting.
+- **Deployed app:** [https://slush-meeting-prep-copilot-demo-cli.vercel.app/](https://slush-meeting-prep-copilot-demo-cli.vercel.app/)
 
 ---
 

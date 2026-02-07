@@ -10,7 +10,13 @@
 
 ---
 
+## Features
 
+- **30-second startup summary** — Bullet-point summary of the startup (LLM output: `startupSummary` array).
+- **Fit score 0–100 with reasons** — `fitScore` (integer 0–100) and `fitReasons` (array of strings).
+- **5 tailored questions** — Exactly five questions for the meeting (`questions` tuple).
+- **Time-boxed 15-minute agenda** — Four slots: 0–2 min, 2–7 min, 7–12 min, 12–15 min (`agenda`: `min0_2`, `min2_7`, `min7_12`, `min12_15`).
+- **Save as notes** — Save generated prep packs via `POST /api/prep-packs`; list view (`GET /api/prep-packs`) and detail view (`GET /api/prep-packs/:id`).
 
 ---
 
